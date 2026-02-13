@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 丙午年 武財神代補財庫 | 降叁 x 神霄玉府財神會館</title>
+    <title>2026 丙午年 武財神代補財庫 | 降叁 X 神霄玉府財神會館</title>
     <!-- 1. 載入 Tailwind CSS (美編樣式庫) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -73,6 +73,7 @@
             )
         };
 
+        // --- 2026 丙午年 初一十五 基礎日程表 ---
         const baseSchedule = [
           { month: '正月', d1: '', d15: '2026-03-03' },
           { month: '二月', d1: '2026-03-19', d15: '2026-04-02' },
@@ -82,28 +83,114 @@
           { month: '六月', d1: '2026-07-15', d15: '2026-07-29' },
           { month: '七月', d1: '2026-08-13', d15: '2026-08-27' },
           { month: '八月', d1: '2026-09-11', d15: '2026-09-25' },
-          { month: '九月', d1: '2026-10-11', d15: '2026-10-25' },
+          { month: '九月', d1: '2026-10-10', d15: '2026-10-24' }, 
           { month: '十月', d1: '2026-11-09', d15: '2026-11-23' },
           { month: '十一月', d1: '2026-12-09', d15: '2026-12-23' },
           { month: '十二月', d1: '2027-01-08', d15: '2027-01-22' },
         ];
 
-        const getAdjustedDate = (dateString) => {
-          if (!dateString) return null;
-          const parts = dateString.split('-');
-          const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-          const baseDate = new Date(2026, 0, 1);
-          const diffDays = Math.round((date - baseDate) / (1000 * 60 * 60 * 24));
-          const stemIndex = (diffDays + 5) % 10; 
-          const isWu = stemIndex === 4 || stemIndex === -6;
+        // 農曆月份映射表
+        const lunarMonthMap = {
+          '正月': 1, '二月': 2, '三月': 3, '四月': 4, '五月': 5, '六月': 6,
+          '七月': 7, '八月': 8, '九月': 9, '十月': 10, '十一月': 11, '十二月': 12
+        };
 
-          if (isWu) {
-            const nextDate = new Date(date);
-            nextDate.setDate(date.getDate() + 1);
-            const nextDateString = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
-            return { original: dateString, actual: nextDateString, isDelayed: true };
+        // 計算是否為戊日、月破日、受死日，並回傳調整後的日期
+        const getAdjustedDate = (dateString, lunarMonthName) => {
+          if (!dateString) return null;
+          
+          // 特殊指定日期規則 (強制覆寫)
+          const specialDateRules = {
+            '2026-03-19': { forceDelay: true, reason: '受死' },
+            '2026-05-01': { forceDelay: true, reason: '受死' },
+            '2026-05-31': { forceDelay: true, reason: '受死' },
+            '2026-06-29': { forceNoDelay: true },
+            '2026-07-29': { forceNoDelay: true },
+            '2026-08-13': { forceNoDelay: true },
+            '2026-09-11': { forceDelay: true, reason: '戊日' }, // 新增
+            '2026-11-09': { forceNoDelay: true },
+            '2027-01-22': { forceDelay: true, reason: '紅紗' }, // 新增 (原1/22順延至1/23)
+          };
+
+          let date = new Date(dateString);
+          let isDelayed = false;
+          let delayReason = '';
+
+          // 1. 檢查是否有特殊規則 (優先執行)
+          if (specialDateRules[dateString]) {
+            const rule = specialDateRules[dateString];
+            if (rule.forceNoDelay) {
+              // 強制不順延，直接回傳原日期
+              const y = date.getFullYear();
+              const m = String(date.getMonth() + 1).padStart(2, '0');
+              const d = String(date.getDate()).padStart(2, '0');
+              return { original: dateString, actual: `${y}-${m}-${d}`, isDelayed: false, delayReason: '' };
+            } else if (rule.forceDelay) {
+              // 強制順延
+              date.setDate(date.getDate() + 1);
+              isDelayed = true;
+              delayReason = rule.reason;
+              
+              const y = date.getFullYear();
+              const m = String(date.getMonth() + 1).padStart(2, '0');
+              const d = String(date.getDate()).padStart(2, '0');
+              return { original: dateString, actual: `${y}-${m}-${d}`, isDelayed: true, delayReason: delayReason };
+            }
           }
-          return { original: dateString, actual: dateString, isDelayed: false };
+
+          // 2. 若無特殊規則，執行原本的農民曆演算法
+          const lunarMonth = lunarMonthMap[lunarMonthName] || 1; 
+          const baseDate = new Date('2026-01-01'); // 己巳日
+          
+          // 受死日對照表 (農曆月 -> 地支索引)
+          const shouSiMap = {
+            1: 10, 2: 4, 3: 11, 4: 5, 5: 0, 6: 6,
+            7: 1, 8: 7, 9: 2, 10: 8, 11: 9, 12: 3
+          };
+
+          for(let i=0; i<3; i++) {
+            const timeDiff = date.getTime() - baseDate.getTime();
+            const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24)); 
+            
+            let stemIndex = (5 + dayDiff) % 10;
+            let branchIndex = (5 + dayDiff) % 12;
+            if (stemIndex < 0) stemIndex += 10;
+            if (branchIndex < 0) branchIndex += 12;
+
+            let reasons = [];
+
+            // 檢查戊日 (天干索引 4)
+            if (stemIndex === 4) {
+              reasons.push('戊日');
+            }
+
+            // 檢查月破 (地支相沖)
+            const yuePoBranch = (lunarMonth + 7) % 12;
+            if (branchIndex === yuePoBranch) {
+              reasons.push('月破');
+            }
+
+            // 檢查受死日
+            const shouSiBranch = shouSiMap[lunarMonth];
+            if (branchIndex === shouSiBranch) {
+              reasons.push('受死日');
+            }
+
+            if (reasons.length > 0) {
+              isDelayed = true;
+              delayReason = reasons.join('/'); 
+              date.setDate(date.getDate() + 1);
+            } else {
+              break;
+            }
+          }
+
+          const y = date.getFullYear();
+          const m = String(date.getMonth() + 1).padStart(2, '0');
+          const d = String(date.getDate()).padStart(2, '0');
+          const actualDate = `${y}-${m}-${d}`;
+
+          return { original: dateString, actual: actualDate, isDelayed, delayReason };
         };
 
         const planOptions = [
@@ -131,8 +218,9 @@
           useEffect(() => {
             const processedSchedule = baseSchedule.map(item => ({
               month: item.month,
-              d1: getAdjustedDate(item.d1),
-              d15: getAdjustedDate(item.d15)
+              // 傳入月份名稱以計算月破/受死
+              d1: getAdjustedDate(item.d1, item.month),
+              d15: getAdjustedDate(item.d15, item.month)
             }));
             setSchedule(processedSchedule);
           }, []);
@@ -179,6 +267,7 @@
 
             setIsSubmitting(true);
             
+            // ⚠️ Google Apps Script URL
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbww0p7OBKoVoC0kp2dDZzLWuHEalhGy-n-FxxKMT6zwCLcmpjQ6cG2C0fVGZjTq/exec';
             
             const calculatedTotal = 800 * parseInt(formData.participantsCount || 1, 10) * formData.selectedDates.length;
@@ -240,6 +329,7 @@
                     <a href="#register" className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 text-stone-950 font-bold text-xl px-10 py-5 rounded-full hover:scale-105 transition-all shadow-[0_0_30px_rgba(234,179,8,0.4)] hover:shadow-[0_0_40px_rgba(234,179,8,0.7)]">
                       立即預約補財庫 <Icons.ArrowRight size={24} />
                     </a>
+                    {/* 連結到 Portaly + 古銅錢圖示 */}
                     <a href="https://portaly.cc/bwa.bway2068" target="_blank" className="inline-flex items-center gap-2 border-2 border-stone-600 hover:border-yellow-600 text-stone-400 hover:text-yellow-500 font-bold text-xl px-10 py-5 rounded-full transition-all hover:scale-105">
                       報名其他科儀 <Icons.AncientCoin size={24} />
                     </a>
@@ -308,31 +398,37 @@
                 </div>
               </section>
 
-              {/* NEW ADVERTISEMENT SECTION */}
+              {/* NEW ADVERTISEMENT SECTION (雙層圖框) */}
               <section className="py-8 px-4 max-w-5xl mx-auto space-y-8">
                 {/* 1200x450 廣告框 */}
                 <div className="relative w-full rounded-3xl overflow-hidden shadow-[0_0_30px_rgba(234,179,8,0.2)] border border-yellow-700/30 group">
-                  {/* 1200x450 廣告圖片放在這裡！請替換 src 內的網址 */}
+                  {/* 請在這裡替換您的廣告圖，例如 src="./ad-banner.jpg" */}
                   <img 
-                    src="https://bwabway2068.github.io/wealth-god-2026/banner1.jpg" 
+                    src="https://images.unsplash.com/photo-1518182170546-07fb61292fa3?q=80&w=2000&auto=format&fit=crop" 
                     alt="武財神宣傳廣告" 
                     className="w-full h-48 md:h-80 object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-105"
                   />
-                  {/* 示意文字標籤 (上線時可刪除這個 div) */}
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  {/* 示意文字 (上線時可刪除) */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-black/60 backdrop-blur-md border border-yellow-500/30 text-yellow-100 px-6 py-3 rounded-full text-sm md:text-base font-bold tracking-wide">
+                      在此處放置您的活動文宣 (建議尺寸 1200x450)
+                    </div>
                   </div>
                 </div>
 
-                {/* 新增：1376x768 說明圖框 */}
+                {/* 1376x768 說明圖框 */}
                 <div className="relative w-full rounded-3xl overflow-hidden shadow-[0_0_30px_rgba(234,179,8,0.2)] border border-yellow-700/30 group">
-                  {/* 1376x768 說明圖片放在這裡！請替換 src 內的網址 */}
+                  {/* 請在這裡替換您的說明圖，例如 src="./detail-info.jpg" */}
                   <img 
-                    src="https://bwabway2068.github.io/wealth-god-2026/banner3.jpg" 
+                    src="https://images.unsplash.com/photo-1621504450181-5d15668b233b?q=80&w=2000&auto=format&fit=crop" 
                     alt="詳細說明圖" 
                     className="w-full aspect-[1376/768] object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-105"
                   />
-                  {/* 示意文字標籤 (上線時可刪除這個 div) */}
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  {/* 示意文字 (上線時可刪除) */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-black/60 backdrop-blur-md border border-yellow-500/30 text-yellow-100 px-6 py-3 rounded-full text-sm md:text-base font-bold tracking-wide">
+                      在此處放置詳細說明圖 (建議尺寸 1376x768)
+                    </div>
                   </div>
                 </div>
               </section>
@@ -363,7 +459,7 @@
                         我們將為您代辦疏文與金紙化吉，補足當月財庫破洞。
                       </p>
                       <div className="inline-block bg-yellow-950/50 text-yellow-400 text-sm px-5 py-2.5 rounded-xl border border-yellow-700/50 mt-2 font-medium shadow-inner">
-                        🎁 結緣禮：招財符 x1 + 藥王願香(10ml) x1
+                        🎁 結緣禮：招財符 x1 + 不定期結緣品 x1
                       </div>
                     </div>
 
@@ -385,7 +481,7 @@
                   <h2 className="text-3xl font-bold text-yellow-500 flex items-center justify-center gap-2 mb-4">
                     <Icons.CalendarDays /> 2026 丙午年 科儀日程表
                   </h2>
-                  <p className="text-stone-400">系統已自動為您避開「戊日」，逢戊日之科儀皆已標示順延一日。</p>
+                  <p className="text-stone-400">系統已自動為您避開「戊日」、「月破日」、「受死日」，逢之皆順延一日。</p>
                 </div>
 
                 <div className="overflow-x-auto bg-stone-900/80 backdrop-blur-md rounded-xl border border-stone-800 shadow-xl">
@@ -407,7 +503,7 @@
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                                   <span className="line-through text-stone-500 text-xs">{item.d1.original}</span>
                                   <span className="text-red-400 font-bold">{item.d1.actual}</span>
-                                  <span className="bg-red-900/60 text-red-200 text-[10px] px-2 py-0.5 rounded border border-red-800 whitespace-nowrap">戊日順延</span>
+                                  <span className="bg-red-900/60 text-red-200 text-[10px] px-2 py-0.5 rounded border border-red-800 whitespace-nowrap">{item.d1.delayReason}順延</span>
                                 </div>
                               ) : (
                                 <span className="text-stone-300">{item.d1.actual}</span>
@@ -422,7 +518,7 @@
                                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                                   <span className="line-through text-stone-500 text-xs">{item.d15.original}</span>
                                   <span className="text-red-400 font-bold">{item.d15.actual}</span>
-                                  <span className="bg-red-900/60 text-red-200 text-[10px] px-2 py-0.5 rounded border border-red-800 whitespace-nowrap">戊日順延</span>
+                                  <span className="bg-red-900/60 text-red-200 text-[10px] px-2 py-0.5 rounded border border-red-800 whitespace-nowrap">{item.d15.delayReason}順延</span>
                                 </div>
                               ) : (
                                 <span className="text-stone-300">{item.d15.actual}</span>
@@ -603,6 +699,7 @@
                             >
                               返回重新報名
                             </button>
+                            {/* 新增：感謝頁底部報名其他科儀按鈕，請記得將 href 換成您的連結 */}
                             <a 
                               href="https://portaly.cc/bwa.bway2068" 
                               target="_blank" 
@@ -622,6 +719,7 @@
 
                       <form onSubmit={handleSubmit} className="space-y-6">
                         
+                        {/* 報名份數設定區塊 */}
                         <div className="bg-stone-950/60 backdrop-blur-sm p-6 rounded-xl border border-yellow-700/50 space-y-4 transition-all">
                           <label className="block text-sm font-medium text-yellow-500 mb-2 flex items-center gap-2">
                             <Icons.Users size={18} /> 請選擇報名份數
@@ -638,6 +736,7 @@
                             ))}
                           </select>
 
+                          {/* 動態顯示備註欄位 (超過1人時才顯示) */}
                           {formData.participantsCount > 1 && (
                             <div className="mt-6 pt-4 border-t border-stone-800 space-y-3 animate-fade-in">
                               <label className="block text-sm font-medium text-yellow-500">
@@ -645,7 +744,7 @@
                               </label>
                               <p className="text-xs text-stone-400 leading-relaxed">
                                 您選擇了 {formData.participantsCount} 份報名，請在此處填寫(包含您)所有參與者的資料以便撰寫疏文。<br/>
-                                <span className="text-yellow-600/90 font-medium">格式：姓名 / 西元國曆(或農曆) 生日 / 時辰 / 地址</span>
+                                <span className="text-yellow-600/90 font-medium">格式：姓名 / 國曆(或農曆) 生日 / 時辰 / 地址</span>
                               </p>
                               <textarea 
                                 name="additionalInfo" 
@@ -743,6 +842,7 @@
                           </div>
                         </div>
 
+                        {/* 法會日期複選區塊 */}
                         <div className="bg-stone-950/60 backdrop-blur-sm p-6 rounded-xl border border-stone-800 space-y-4">
                           <div className="mb-3">
                             <label className="block text-sm font-medium text-yellow-500">請選擇參加法會日期 (可複選) *</label>
@@ -779,7 +879,7 @@
                                       {session.month} {session.type}科儀
                                     </span>
                                     <span className="text-xs text-stone-500 mt-0.5">
-                                      {session.dateInfo.actual} {session.dateInfo.isDelayed && <span className="ml-1 text-[10px] bg-red-900/60 text-red-200 px-1.5 py-0.5 rounded border border-red-800">戊日順延</span>}
+                                      {session.dateInfo.actual} {session.dateInfo.isDelayed && <span className="ml-1 text-[10px] bg-red-900/60 text-red-200 px-1.5 py-0.5 rounded border border-red-800">{session.dateInfo.delayReason}順延</span>}
                                     </span>
                                   </div>
                                 </label>
@@ -788,6 +888,7 @@
                           </div>
                         </div>
 
+                        {/* 匯款資訊區塊 */}
                         <div className="bg-gradient-to-b from-stone-900 to-stone-950 backdrop-blur-sm p-6 md:p-8 rounded-xl border border-yellow-700/50 space-y-4 shadow-lg relative overflow-hidden">
                           <div className="absolute right-[-10%] top-[-20%] w-48 h-48 bg-yellow-600/10 blur-[60px] rounded-full pointer-events-none"></div>
                           
@@ -804,6 +905,7 @@
                               <span className="text-stone-400 font-sans text-sm">匯款帳號</span>
                               <span className="font-black text-yellow-400 text-2xl tracking-widest">059506013547</span>
                             </div>
+                            {/* 動態顯示總金額 */}
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 mt-2 border-t border-stone-800 gap-1">
                               <span className="text-stone-400 font-sans text-sm">本次應繳結緣金</span>
                               <span className="font-black text-yellow-400 text-2xl">NT$ {totalPrice.toLocaleString()}</span>
@@ -836,8 +938,9 @@
                 </div>
               </section>
 
+              {/* Footer */}
               <footer className="bg-black/80 backdrop-blur-md py-8 text-center text-stone-500 text-sm border-t border-stone-900/50">
-                <p>降叁 x 神霄玉府財神會館 © 2026 丙午年 代補財庫祈福專案</p>
+                <p>降叁 X 神霄玉府財神會館 © 2026 丙午年 代補財庫祈福專案</p>
               </footer>
             </div>
           );
@@ -848,7 +951,3 @@
     </script>
 </body>
 </html>
-
-
-
-
