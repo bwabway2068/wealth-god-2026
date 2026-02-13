@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>降叁吉卜 | Xiang San Divination</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&family=Zhi+Mang+Xing&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    
+    <meta name="description" content="降叁吉卜 - 結合現代網頁設計與傳統易經智慧的占卜應用。">
+    <meta property="og:title" content="降叁吉卜 | Xiang San Divination">
+    <meta property="og:type" content="website">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lux: {
+                            black: '#0a0a0a',
+                            dark: '#1a1a1a',
+                            gold: '#FFD700',
+                            goldDim: '#C5A059',
+                            red: '#8B0000',
+                            redBright: '#D93025',
+                            text: '#E0E0E0',
+                            card: 'rgba(20, 20, 20, 0.85)',
+                            border: 'rgba(255, 215, 0, 0.3)'
+                        }
+                    },
+                    fontFamily: {
+                        calligraphy: ['"Zhi Mang Xing"', 'cursive'],
+                        serif: ['"Noto Serif TC"', 'serif'],
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        engSerif: ['"Cinzel"', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'ink-spread': 'inkSpread 1.5s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-gold': 'pulseGold 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        inkSpread: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseGold: {
+                            '0%, 100%': { boxShadow: '0 0 5px rgba(255, 215, 0, 0.2)' },
+                            '50%': { boxShadow: '0 0 20px rgba(255, 215, 0, 0.6)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            background-image: 
+                radial-gradient(circle at 50% 0%, #2a0a0a 0%, transparent 70%),
+                url("https://www.transparenttextures.com/patterns/black-scales.png");
+            color: #E0E0E0;
+            overflow-x: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .lux-panel {
+            background: rgba(20, 20, 20, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
+        }
+
+        .calligraphy-title {
+            font-family: 'Zhi Mang Xing', cursive;
+            color: #FFD700;
+            text-shadow: 
+                2px 2px 0px rgba(0, 0, 0, 0.9),
+                0 0 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .eng-title {
+            font-family: 'Cinzel', serif;
+            color: #FFD700;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 0 auto;
+            margin-bottom: 20px;
+        }
+
+        .hex-line {
+            width: 90px;
+            height: 12px;
+            margin: 6px auto;
+            background: linear-gradient(90deg, #C5A059, #FFD700, #C5A059);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+        .hex-line.yin {
+            background: transparent;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: none;
+        }
+        .hex-line.yin::before, .hex-line.yin::after {
+            content: '';
+            width: 38px;
+            height: 100%;
+            background: linear-gradient(90deg, #C5A059, #FFD700, #C5A059);
+            border-radius: 2px;
+            display: block;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
+        .seal {
+            border: 2px solid #D93025;
+            color: #D93025;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: bold;
+            display: inline-block;
+            padding: 4px 6px;
+            line-height: 1;
+            border-radius: 4px;
+            opacity: 0.9;
+            transform: rotate(-5deg);
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 10px rgba(217, 48, 37, 0.3);
+        }
+        
+        .lang-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #FFD700;
+            color: #FFD700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Cinzel', serif;
+        }
+        .lang-switch:hover {
+            background: #FFD700;
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #b8860b 0%, #FFD700 50%, #b8860b 100%);
+            color: #000;
+            border: 1px solid #FFD700;
+            transition: all 0.3s;
+        }
+        .btn-gold:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .btn-dark {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #FFD700;
+            color: #FFD700;
+        }
+        .btn-dark:hover {
+            background: rgba(50, 50, 50, 0.9);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col items-center justify-center p-4 selection:bg-lux-gold selection:text-black">
+
+    <button onclick="toggleLanguage()" class="lang-switch" id="langBtn">EN</button>
+
+    <div class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[15rem] md:text-[25rem] font-calligraphy text-lux-gold opacity-[0.05] pointer-events-none select-none z-0">
+        易
+    </div>
+
+    <header class="text-center mb-8 animate-ink-spread relative z-10 w-full max-w-lg mt-8">
+        <div class="relative h-48 md:h-60 w-full flex items-center justify-center">
+            <div class="absolute w-48 h-48 md:w-56 md:h-56 border-[2px] border-lux-gold/20 rounded-full transform rotate-45 scale-y-90 blur-[1px]"></div>
+            <div class="absolute w-40 h-40 md:w-48 md:h-48 border border-lux-red/30 rounded-full transform -rotate-12 scale-x-90"></div>
+            
+            <div id="mainTitleContainer" class="relative z-10 grid grid-cols-2 gap-x-2 md:gap-x-6 gap-y-0 calligraphy-title w-full max-w-xs mx-auto">
+                <div class="text-7xl md:text-9xl text-right transform -rotate-3 translate-y-2 origin-bottom-right drop-shadow-sm text-lux-gold z-10">降</div>
+                <div class="text-8xl md:text-[8rem] text-left pt-6 pl-2 text-lux-gold transform rotate-2">叁</div>
+                <div class="text-7xl md:text-[7rem] text-right -mt-6 pr-4 text-lux-gold transform rotate-6">吉</div>
+                <div class="text-6xl md:text-8xl text-left -ml-2 -mt-2 transform -rotate-2 text-lux-gold">卜</div>
+            </div>
+
+            <div class="absolute bottom-4 right-10 md:right-16 transform rotate-6 z-20">
+                <div class="w-10 h-10 border border-lux-red rounded-sm flex items-center justify-center bg-black/60 backdrop-blur-[2px] shadow-lg">
+                    <span class="text-lux-redBright font-serif font-bold text-xs writing-vertical-rl leading-none pt-1" id="sealText">上吉</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="h-[1px] w-16 bg-lux-gold/50 mx-auto -mt-2 mb-4"></div>
+        <p class="text-lux-goldDim font-serif tracking-[0.5em] text-[10px] uppercase opacity-90">Xiang San Divination</p>
+    </header>
+
+    <main class="w-full max-w-lg relative z-10 mb-12">
+        
+        <div id="inputCard" class="lux-panel rounded-2xl p-6 md:p-8 animate-fade-in transition-all duration-500">
+            <div class="flex mb-8 bg-black/40 rounded-lg p-1 border border-lux-gold/20">
+                <button onclick="switchTab('date')" id="tab-date" class="flex-1 py-3 text-sm font-serif font-bold rounded-md transition-all btn-gold shadow-md tracking-widest">
+                    每日運勢
+                </button>
+                <button onclick="switchTab('random')" id="tab-random" class="flex-1 py-3 text-sm font-serif font-bold rounded-md transition-all text-lux-goldDim hover:text-lux-gold tracking-widest">
+                    隨機卜卦
+                </button>
+            </div>
+
+            <div id="mode-date" class="block animate-fade-in">
+                <div class="text-center mb-8">
+                    <p class="text-lux-goldDim mb-4 text-xs tracking-[0.3em] font-serif">DAILY ENERGY</p>
+                    <div class="text-3xl font-serif text-lux-gold border-b border-lux-gold/30 pb-4 inline-block font-bold">
+                        <span id="currentDateDisplay">--.--.--</span>
+                    </div>
+
+                    <div class="text-left mt-6 mb-4 px-2">
+                         <p class="text-xs text-gray-400 leading-relaxed font-sans" id="dailyIntro">
+                            此模式結合易經與日期靈數。輸入姓名可綁定個人專屬磁場，計算出您今日的流年運勢與五行能量分佈，請在內心誠心思考問題後開卦。
+                         </p>
+                    </div>
+
+                    <div class="mt-4 px-4">
+                        <input type="text" id="dailyName" placeholder="請輸入姓名或暱稱" 
+                            class="w-full bg-transparent border-b border-lux-gold/30 text-lux-gold text-center py-3 focus:outline-none focus:border-lux-gold transition-all font-serif placeholder-gray-600 text-lg tracking-widest">
+                        <p class="text-[10px] text-gray-500 mt-2 tracking-wider" id="dailyHint">輸入以綁定個人專屬磁場 (留空則隨機)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mode-random" class="hidden animate-fade-in">
+                <div class="text-center mb-6">
+                    <p class="text-lux-goldDim mb-2 text-xs tracking-[0.3em] font-serif">DIVINE GUIDANCE</p>
+                    <p class="text-gray-400 text-sm font-serif tracking-widest mb-4" id="randomTitle">請誠心默念以下祝禱文</p>
+                    
+                    <div class="text-left mb-4 px-2">
+                        <p class="text-xs text-gray-400 leading-relaxed font-sans" id="randomIntro">
+                           此模式模擬傳統擲筊與卜卦儀式。透過誠心祝禱連結宇宙場域，隨機抽取六十四卦中的一卦，解答您心中的疑惑。
+                        </p>
+                   </div>
+
+                    <div class="bg-black/40 p-5 rounded-xl border border-lux-gold/20 shadow-inner mb-4 text-left relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-8 h-8 bg-lux-gold/10 rounded-bl-xl"></div>
+                        <div id="prayerContent">
+                            <p class="text-lux-goldDim text-sm leading-relaxed font-serif text-justify mb-4">
+                                「拜請八卦祖師、伏羲、文王、周公、孔子五大聖賢、本地主司福德正神、排卦童子、成卦童郎，駕臨指示聖卦。」
+                            </p>
+                            <div class="h-[1px] w-full bg-lux-gold/20 mb-4"></div>
+                            <p class="text-lux-goldDim text-sm leading-relaxed font-serif text-justify">
+                                「今有弟子（或信女）<span class="text-lux-gold font-bold border-b border-dotted border-lux-gold">○○○</span>... 今為之事，吉凶憂疑難決，請指點聖卦以決憂疑。」
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startDivination()" id="startBtn" class="w-full btn-gold font-serif font-bold py-5 rounded-xl shadow-[0_0_20px_rgba(255,215,0,0.3)] transform transition-all hover:scale-[1.02] active:scale-[0.98] group overflow-hidden relative mt-4">
+                <span class="relative z-10 tracking-[0.5em] text-lg text-black font-black">開 卦</span>
+                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+            </button>
+        </div>
+
+        <div id="loadingState" class="hidden lux-panel rounded-2xl p-8 text-center min-h-[500px] flex flex-col justify-center items-center">
+            <div class="relative mb-12">
+                <div class="w-24 h-24 border border-lux-gold/20 rounded-full animate-spin" style="animation-duration: 3s;"></div>
+                <div class="absolute top-0 left-0 w-24 h-24 border-t-2 border-lux-gold rounded-full animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center font-calligraphy text-4xl text-lux-gold animate-pulse" id="loadingIcon">易</div>
+            </div>
+            <p class="text-2xl font-serif text-lux-gold mb-4 tracking-widest" id="loadingTitle">推 演 中</p>
+            <p class="text-xs text-lux-goldDim tracking-[0.2em] uppercase" id="loadingText">Connecting...</p>
+        </div>
+
+        <div id="resultCard" class="hidden lux-panel rounded-2xl overflow-hidden animate-fade-in shadow-2xl bg-black/80">
+            <div class="p-8 pb-4 text-center bg-gradient-to-b from-lux-dark to-black relative border-b border-lux-gold/20">
+                <h2 class="text-lux-goldDim/70 text-[10px] font-bold tracking-[0.4em] uppercase mb-4">THE REVELATION</h2>
+                <div class="absolute top-6 right-6">
+                    <span id="hexagramLevel" class="bg-lux-gold text-black text-xs font-serif font-bold px-3 py-1 rounded-full border border-lux-gold shadow-[0_0_10px_rgba(255,215,0,0.5)]">吉</span>
+                </div>
+                <h3 id="hexagramTitle" class="text-5xl md:text-6xl font-serif font-bold text-lux-gold mb-6 leading-tight tracking-widest drop-shadow-md">乾為天</h3>
+                <div id="hexagramVisual" class="my-6 transform scale-100 origin-center opacity-90 flex flex-col items-center justify-center filter drop-shadow-[0_0_5px_rgba(255,215,0,0.5)]">
+                </div>
+                <p id="hexagramDesc" class="text-lux-text text-lg font-serif font-medium leading-relaxed mt-6 px-4 italic border-t border-lux-gold/10 pt-4">
+                    "天行健，君子以自強不息。"
+                </p>
+            </div>
+
+            <div class="px-6 py-4 bg-black/40">
+                <div class="text-center mb-2">
+                    <span class="text-xs text-lux-goldDim tracking-widest border-b border-lux-goldDim/30 pb-1" id="chartTitle">五行能量分析</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="energyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="p-8 bg-lux-dark pt-4">
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="border-l-2 border-pink-700/50 pl-4 py-2 bg-black/20 hover:bg-black/40 transition-colors rounded-r-lg">
+                            <div class="text-pink-400 mb-1 font-serif font-bold tracking-widest text-sm"><i class="fas fa-heart mr-2 text-xs"></i><span id="labelLove">愛情運勢</span></div>
+                            <p id="resLove" class="text-sm text-gray-300 leading-relaxed font-sans font-light text-justify">...</p>
+                        </div>
+                        <div class="border-l-2 border-yellow-600/50 pl-4 py-2 bg-black/20 hover:bg-black/40 transition-colors rounded-r-lg">
+                            <div class="text-yellow-400 mb-1 font-serif font-bold tracking-widest text-sm"><i class="fas fa-coins mr-2 text-xs"></i><span id="labelWealth">財運解析</span></div>
+                            <p id="resWealth" class="text-sm text-gray-300 leading-relaxed font-sans font-light text-justify">...</p>
+                        </div>
+                        <div class="border-l-2 border-blue-600/50 pl-4 py-2 bg-black/20 hover:bg-black/40 transition-colors rounded-r-lg">
+                            <div class="text-blue-400 mb-1 font-serif font-bold tracking-widest text-sm"><i class="fas fa-briefcase mr-2 text-xs"></i><span id="labelCareer">事業前程</span></div>
+                            <p id="resCareer" class="text-sm text-gray-300 leading-relaxed font-sans font-light text-justify">...</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-6 bg-gradient-to-br from-lux-black to-lux-dark rounded border border-lux-gold/30 relative shadow-lg">
+                        <div class="absolute top-0 left-0 w-2 h-2 border-t border-l border-lux-gold"></div>
+                        <div class="absolute top-0 right-0 w-2 h-2 border-t border-r border-lux-gold"></div>
+                        <div class="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-lux-gold"></div>
+                        <div class="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-lux-gold"></div>
+
+                        <div class="flex flex-col border-b border-lux-gold/20 pb-4 mb-4">
+                            <h4 class="text-lux-gold font-bold tracking-wider text-xs font-serif mb-2" id="labelNoble">貴人與方位</h4>
+                            <span id="resNoble" class="text-gray-300 text-sm font-sans font-medium leading-relaxed">...</span>
+                        </div>
+                        
+                        <div class="flex flex-col border-b border-lux-gold/20 pb-4 mb-4">
+                            <h4 class="text-lux-gold font-bold tracking-wider text-xs font-serif mb-2" id="labelDeity">本日適合拜的神尊</h4>
+                            <span id="resDeity" class="text-white text-sm font-sans font-bold leading-relaxed drop-shadow-[0_0_3px_rgba(255,215,0,0.5)]">...</span>
+                        </div>
+
+                        <div class="flex flex-col border-b border-lux-gold/20 pb-4 mb-4">
+                            <h4 class="text-lux-gold font-bold tracking-wider text-xs font-serif mb-2" id="labelRitual">建議搭配科儀</h4>
+                            <div id="resRitual" class="text-gray-300 text-sm font-sans leading-relaxed"></div>
+                        </div>
+
+                        <h4 class="text-lux-gold font-bold mb-2 text-sm tracking-wide font-serif" id="labelAdvice">降叁 · 關鍵叮嚀</h4>
+                        <p id="resLuck" class="text-sm text-gray-300 leading-relaxed text-justify font-light">...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-black p-8 text-center border-t border-lux-gold/20">
+                <div class="mb-6">
+                    <p class="text-lux-gold font-serif font-bold text-lg mb-2" id="ctaTitle">天機已現，如何化解？</p>
+                    <p class="text-xs text-gray-500 font-sans tracking-wide">
+                        <span class="text-lux-goldDim" id="ctaSubtitle">加入社群</span> <span id="ctaSubtitle2">獲取更多流年資訊</span>
+                    </p>
+                </div>
+                
+                <div class="space-y-3">
+                    <a href="https://portaly.cc/bwa.bway2068" target="_blank" class="block w-full bg-[#06C755] hover:bg-[#05b54d] text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center shadow-[0_0_15px_rgba(6,199,85,0.3)] hover:shadow-[0_0_20px_rgba(6,199,85,0.5)] border border-[#06C755]">
+                        <i class="fab fa-line text-2xl mr-3"></i> 
+                        <span class="tracking-widest font-serif" id="ctaLine">加 LINE 領取轉運符及最新科儀</span>
+                    </a>
+                    
+                    <div class="flex space-x-3">
+                        <a href="https://www.instagram.com/bwa.bway2068/" target="_blank" class="flex-1 bg-gradient-to-tr from-yellow-600/20 via-red-600/20 to-purple-700/20 border border-gray-700 text-gray-200 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center hover:border-gray-500 hover:text-white shadow-md font-serif">
+                            <i class="fab fa-instagram text-xl mr-2"></i> <span id="ctaIg">追蹤 IG</span>
+                        </a>
+                        <a href="https://www.tiktok.com/@bwa_bway2068" target="_blank" class="flex-1 bg-[#111] border border-gray-700 text-white py-3.5 rounded-xl font-bold transition-all flex items-center justify-center hover:border-gray-500 hover:bg-[#222] shadow-md font-serif">
+                            <i class="fab fa-tiktok text-xl mr-2"></i> <span id="ctaTiktok">關注 TikTok</span>
+                        </a>
+                    </div>
+
+                    <a href="#" class="block w-full btn-dark py-3.5 rounded-xl font-bold transition-all flex items-center justify-center shadow-lg mt-3" id="ctaRitualLink">
+                        <i class="fas fa-book-open text-lg mr-2"></i>
+                        <span class="tracking-widest font-serif" id="ctaRitual">了解其他科儀</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="p-5 text-center bg-black border-t border-gray-900">
+                <button onclick="resetApp()" id="restartBtn" class="text-gray-500 text-xs hover:text-lux-gold transition-colors tracking-[0.2em] flex items-center justify-center mx-auto">
+                    <i class="fas fa-redo-alt mr-2"></i> 重新占卜
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-8 text-center text-[10px] text-lux-goldDim/50 relative z-10 font-serif tracking-[0.2em] uppercase">
+        <p>&copy; 2026 Xiang San Divination. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const display = document.getElementById('currentDateDisplay');
+            if(display) {
+                display.innerText = `${today.getFullYear()} . ${String(today.getMonth() + 1).padStart(2, '0')} . ${String(today.getDate()).padStart(2, '0')}`;
+            }
+        });
+
+        let currentMode = 'date';
+        let currentLang = 'zh';
+        let chartInstance = null; 
+
+        const i18n = {
+            zh: {
+                tabDate: '每日運勢',
+                tabRandom: '隨機卜卦',
+                dailyIntro: '此模式結合易經與日期靈數。輸入姓名可綁定個人專屬磁場，計算出您今日的流年運勢與五行能量分佈，請在內心誠心思考問題後開卦。',
+                dailyPlaceholder: '請輸入姓名或暱稱',
+                dailyHint: '輸入以綁定個人專屬磁場 (留空則隨機)',
+                randomTitle: '請誠心默念以下祝禱文',
+                randomIntro: '此模式模擬傳統擲筊與卜卦儀式。透過誠心祝禱連結宇宙場域，隨機抽取六十四卦中的一卦，解答您心中的疑惑。',
+                prayerContent: `<p class="text-lux-goldDim text-sm leading-relaxed font-serif text-justify mb-4">「拜請八卦祖師、伏羲、文王、周公、孔子五大聖賢、本地主司福德正神、排卦童子、成卦童郎，駕臨指示聖卦。」</p><div class="h-[1px] w-full bg-lux-gold/20 mb-4"></div><p class="text-lux-text text-sm leading-relaxed font-serif text-justify">「今有弟子（或信女）<span class="text-lux-gold font-bold border-b border-dotted border-lux-gold">○○○</span>... 今為之事，吉凶憂疑難決，請指點聖卦以決憂疑。」</p>`,
+                startBtn: '開 卦',
+                loadingTitle: '推 演 中',
+                loadingText: 'Connecting...',
+                headerReveal: 'THE REVELATION',
+                chartTitle: '五行能量分析',
+                labelLove: '愛情運勢',
+                labelWealth: '財運解析',
+                labelCareer: '事業前程',
+                labelNoble: '貴人與方位',
+                labelDeity: '本日適合拜的神尊',
+                labelRitual: '建議搭配科儀',
+                labelAdvice: '降叁 · 關鍵叮嚀',
+                ctaTitle: '天機已現，如何化解？',
+                ctaSubtitle: '加入社群',
+                ctaSubtitle2: '獲取更多科儀資訊',
+                ctaLine: '加 LINE 領取轉運符及最新科儀',
+                ctaIg: '追蹤 IG',
+                ctaTiktok: '關注 TikTok',
+                ctaRitual: '了解其他科儀',
+                restartBtn: '重新占卜',
+                seal: '上吉',
+                icon: '易'
+            },
+            en: {
+                tabDate: 'Daily Fortune',
+                tabRandom: 'Oracle Cast',
+                dailyIntro: 'Combines I Ching with Numerology. Enter your name to bind your personal energy field for a precise reading. Please meditate on your question before starting.',
+                dailyPlaceholder: 'Enter Name or Nickname',
+                dailyHint: 'Name binds energy (Leave empty for random)',
+                randomTitle: 'Please Meditate on the Prayer',
+                randomIntro: 'Simulates traditional divination. Connect with the universe through sincere prayer to draw one of the 64 hexagrams.',
+                prayerContent: `<p class="text-lux-goldDim text-sm leading-relaxed font-serif text-justify mb-4">"I call upon the Eight Trigrams Ancestors, the Sages, and the Guardian Spirits to guide this reading."</p><div class="h-[1px] w-full bg-lux-gold/20 mb-4"></div><p class="text-lux-text text-sm leading-relaxed font-serif text-justify">"I, <span class="text-lux-gold font-bold border-b border-dotted border-lux-gold">[Name]</span>, living at <span class="text-lux-gold font-bold border-b border-dotted border-lux-gold">[Address]</span>, ask for guidance regarding my doubts today."</p>`,
+                startBtn: 'REVEAL',
+                loadingTitle: 'DIVINING',
+                loadingText: 'Connecting to the Void...',
+                headerReveal: 'THE REVELATION',
+                chartTitle: 'Energy Analysis',
+                labelLove: 'Love',
+                labelWealth: 'Wealth',
+                labelCareer: 'Career',
+                labelNoble: 'Noble & Direction',
+                labelDeity: 'Guardian Deity',
+                labelRitual: 'Recommended Ritual',
+                labelAdvice: 'Key Advice',
+                ctaTitle: 'Destiny Revealed, Now What?',
+                ctaSubtitle: 'Join Community',
+                ctaSubtitle2: 'for more insights',
+                ctaLine: 'Get Lucky Charm via LINE',
+                ctaIg: 'Follow IG',
+                ctaTiktok: 'TikTok',
+                ctaRitual: 'More Rituals',
+                restartBtn: 'RESTART',
+                seal: 'Luck',
+                icon: 'I Ching'
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            const btn = document.getElementById('langBtn');
+            const t = i18n[currentLang];
+            btn.innerText = currentLang === 'zh' ? 'EN' : '中';
+            const titleContainer = document.getElementById('mainTitleContainer');
+            if (currentLang === 'zh') {
+                titleContainer.className = "relative z-10 grid grid-cols-2 gap-x-2 md:gap-x-6 gap-y-0 calligraphy-title w-full max-w-xs mx-auto";
+                titleContainer.innerHTML = `
+                    <div class="text-7xl md:text-9xl text-right transform -rotate-3 translate-y-2 origin-bottom-right drop-shadow-sm text-lux-gold z-10">降</div>
+                    <div class="text-8xl md:text-[8rem] text-left pt-6 pl-2 text-lux-gold transform rotate-2">叁</div>
+                    <div class="text-7xl md:text-[7rem] text-right -mt-6 pr-4 text-lux-gold transform rotate-6">吉</div>
+                    <div class="text-6xl md:text-8xl text-left -ml-2 -mt-2 transform -rotate-2 text-lux-gold">卜</div>
+                `;
+                document.getElementById('loadingIcon').className = "absolute inset-0 flex items-center justify-center font-calligraphy text-4xl text-lux-gold animate-pulse";
+            } else {
+                titleContainer.className = "relative z-10 flex flex-col items-center justify-center w-full max-w-md mx-auto";
+                titleContainer.innerHTML = `
+                    <div class="eng-title text-4xl md:text-5xl mb-2">XIANG SAN</div>
+                    <div class="eng-title text-2xl md:text-3xl tracking-[0.5em] opacity-80">DIVINATION</div>
+                `;
+                document.getElementById('loadingIcon').className = "absolute inset-0 flex items-center justify-center font-serif text-4xl text-lux-gold animate-pulse font-bold";
+            }
+            document.getElementById('tab-date').innerText = t.tabDate;
+            document.getElementById('tab-random').innerText = t.tabRandom;
+            document.getElementById('dailyIntro').innerText = t.dailyIntro;
+            document.getElementById('dailyName').placeholder = t.dailyPlaceholder;
+            document.getElementById('dailyHint').innerText = t.dailyHint;
+            document.getElementById('randomTitle').innerText = t.randomTitle;
+            document.getElementById('randomIntro').innerText = t.randomIntro;
+            document.getElementById('prayerContent').innerHTML = t.prayerContent;
+            document.querySelector('#startBtn span').innerText = t.startBtn;
+            document.getElementById('loadingTitle').innerText = t.loadingTitle;
+            document.getElementById('loadingIcon').innerText = t.icon;
+            document.querySelector('#resultCard h2').innerText = t.headerReveal;
+            document.getElementById('chartTitle').innerText = t.chartTitle;
+            document.getElementById('labelLove').innerText = t.labelLove;
+            document.getElementById('labelWealth').innerText = t.labelWealth;
+            document.getElementById('labelCareer').innerText = t.labelCareer;
+            document.getElementById('labelNoble').innerText = t.labelNoble;
+            document.getElementById('labelDeity').innerText = t.labelDeity;
+            document.getElementById('labelRitual').innerText = t.labelRitual;
+            document.getElementById('labelAdvice').innerText = t.labelAdvice;
+            document.getElementById('ctaTitle').innerText = t.ctaTitle;
+            document.getElementById('ctaSubtitle').innerText = t.ctaSubtitle;
+            document.getElementById('ctaSubtitle2').innerText = t.ctaSubtitle2;
+            document.getElementById('ctaLine').innerText = t.ctaLine;
+            document.getElementById('ctaIg').innerText = t.ctaIg;
+            document.getElementById('ctaTiktok').innerText = t.ctaTiktok;
+            document.getElementById('ctaRitual').innerText = t.ctaRitual;
+            document.getElementById('restartBtn').innerText = t.restartBtn;
+            document.getElementById('sealText').innerText = t.seal;
+        }
+
+        const trigrams = { 1: { name: '乾', lines: [1,1,1] }, 2: { name: '兌', lines: [1,1,0] }, 3: { name: '離', lines: [1,0,1] }, 4: { name: '震', lines: [1,0,0] }, 5: { name: '巽', lines: [0,1,1] }, 6: { name: '坎', lines: [0,1,0] }, 7: { name: '艮', lines: [0,0,1] }, 8: { name: '坤', lines: [0,0,0] } };
+
+        const godList = [
+            { zh: "玉皇大帝 (祈求萬事順利)", en: "Jade Emperor (General Blessings)" }, { zh: "關聖帝君 (祈求事業、財運)", en: "Guan Yu (Career & Wealth)" }, { zh: "福德正神 (土地公，祈求財運、平安)", en: "Earth God (Tu Di Gong) (Wealth & Safety)" }, { zh: "天上聖母 (媽祖，祈求平安、守護)", en: "Mazu (Protection & Safety)" }, { zh: "玄天上帝 (祈求消災、鎮宅)", en: "Xuan Wu (Disaster Relief)" }, { zh: "文昌帝君 (祈求考試、功名)", en: "Wen Chang (Academic Success)" }, { zh: "五路財神 (祈求正財、偏財)", en: "Five Wealth Gods (Wealth)" }, { zh: "太歲星君 (祈求流年平安)", en: "Tai Sui (Yearly Protection)" }, { zh: "中壇元帥 (三太子，祈求行動力、開路)", en: "Nezha (Action & Breakthrough)" }, { zh: "城隍爺 (祈求公正、除惡)", en: "City God (Justice)" }, { zh: "註生娘娘 (祈求子女、健康)", en: "Goddess of Birth (Fertility & Health)" }, { zh: "月下老人 (祈求姻緣、桃花)", en: "Yue Lao (Love & Marriage)" }, { zh: "清水祖師 (祈求雨水、醫藥)", en: "Master Qingshui (Health & Rain)" }, { zh: "保生大帝 (祈求健康、治病)", en: "Baosheng Dadi (Healing)" }, { zh: "孚佑帝君 (呂洞賓，祈求智慧、健康)", en: "Lu Dongbin (Wisdom & Health)" },
+            { zh: "釋迦牟尼佛 (祈求智慧、覺悟)", en: "Shakyamuni Buddha (Wisdom)" }, { zh: "觀世音菩薩 (祈求大慈大悲、救苦救難)", en: "Guanyin Bodhisattva (Compassion)" }, { zh: "阿彌陀佛 (祈求心靈平靜)", en: "Amitabha Buddha (Peace)" }, { zh: "藥師佛 (祈求身心健康)", en: "Medicine Buddha (Health)" }, { zh: "地藏王菩薩 (祈求消除業障)", en: "Ksitigarbha Bodhisattva (Karma Clearing)" }, { zh: "彌勒佛 (祈求快樂、招財)", en: "Maitreya Buddha (Joy & Wealth)" }, { zh: "文殊菩薩 (祈求智慧、學業)", en: "Manjusri Bodhisattva (Wisdom)" }, { zh: "普賢菩薩 (祈求實踐、行動)", en: "Samantabhadra Bodhisattva (Action)" }, { zh: "虛空藏菩薩 (祈求記憶力、財富)", en: "Akasagarbha Bodhisattva (Memory & Wealth)" }, { zh: "大勢至菩薩 (祈求智慧光)", en: "Mahasthamaprapta (Wisdom Light)" }, { zh: "準提菩薩 (祈求事業成功)", en: "Cundi Bodhisattva (Career Success)" }, { zh: "千手觀音 (祈求圓滿無礙)", en: "Thousand-Hand Guanyin (Perfection)" }, { zh: "韋馱菩薩 (祈求護法、平安)", en: "Skanda Bodhisattva (Protection)" }, { zh: "伽藍菩薩 (關公，祈求護持)", en: "Sangharama Bodhisattva (Guan Yu) (Guardianship)" }, { zh: "不動明王 (祈求破除障礙)", en: "Acala Vidyaraja (Obstacle Removal)" }
+        ];
+
+        const hexagramData = {
+            "1,1": { name: "乾為天", name_en: "The Creative", level: "大吉", desc: "天行健，君子以自強不息。", love: "雙方情投意合，感情發展迅速，但需注意不可過於強勢，多些溫柔體貼能讓關係更長久。", love_en: "Mutual attraction moves fast. Avoid being too dominant; tenderness ensures longevity.", wealth: "正財運勢極佳，利於長期投資與規劃，但切忌因自信過度而進行高風險投機，穩紮穩打為上。", wealth_en: "Excellent financial luck for long-term investments. Avoid overconfidence in high-risk ventures.", career: "事業如日中天，領導能力備受肯定，正是大展鴻圖的好時機，但需保持謙卑，以免招人嫉妒。", career_en: "Career is at its peak. Your leadership is recognized. Stay humble to avoid jealousy.", noble: "【西北方】有男性長輩或領導者相助，能提供關鍵指引。", noble_en: "[Northwest] Male elders or leaders offer key guidance.", advice: "運勢雖強，但物極必反，凡事需留有餘地，謙虛待人方能持盈保泰，切勿得意忘形。", advice_en: "Luck is strong, but extremes turn. Leave room for others and stay humble to maintain success.", radar: [90, 95, 100, 85, 90] },
+            "8,8": { name: "坤為地", name_en: "The Receptive", level: "大吉", desc: "地勢坤，君子以厚德載物。", love: "包容與溫柔是關鍵，細水長流的感情最為穩固，多傾聽對方的需求與心聲，關係將更緊密。", love_en: "Tolerance and gentleness are key. Steady, long-term relationships are favored. Listen more.", wealth: "財運穩健，適合積少成多，不宜急躁獲利，投資不動產或土地相關項目有利，保守為上策。", wealth_en: "Steady wealth accumulation. Real estate investments are favorable. Be conservative.", career: "以退為進，輔佐他人更能展現價值，默默耕耘終將獲得巨大的回報與肯定，適合幕後工作。", career_en: "Advance by retreating. Supporting others reveals your value. Hard work pays off.", noble: "【西南方】有女性長輩或母親般的貴人，能給予溫暖支持。", noble_en: "[Southwest] Female elders or mother figures provide warm support.", advice: "順勢而為，像大地一樣厚德載物，切勿強出頭，以柔克剛是最佳策略，耐心等待成果。", advice_en: "Follow the flow like the earth. Don't force leadership. Softness overcomes hardness.", radar: [85, 70, 60, 95, 80] },
+            "6,4": { name: "水雷屯", name_en: "Difficulty at the Beginning", level: "凶", desc: "萬事起頭難，需耐心等待。", love: "感情初期多波折，彼此誤會較多，需有極大的耐心去化解，堅持下去方能看到轉機。", love_en: "Early relationship struggles and misunderstandings. Patience and persistence are required.", wealth: "財運未開，資金週轉可能面臨困難，宜守不宜攻，切勿進行新的投資，以免血本無歸。", wealth_en: "Financial luck is blocked. Cash flow issues. Defend, don't attack. Avoid new investments.", career: "創業初期艱辛，凡事需親力親為，目前時機尚未成熟，需打好基礎，勿急於求成。", career_en: "Hard beginnings. Do things yourself. The time isn't ripe; build a foundation first.", noble: "【正北方】有智者或專業人士，需主動尋求才能獲得幫助。", noble_en: "[North] Wise men or professionals are available if you seek them.", advice: "屯者難也，勿急躁，目前宜累積實力，等待時機成熟再行動，切勿輕舉妄動。", advice_en: "It is a difficult time. Do not rush. Accumulate strength and wait for the right moment.", radar: [40, 30, 45, 50, 60] },
+            "7,6": { name: "山水蒙", name_en: "Youthful Folly", level: "平", desc: "蒙以養正，啟蒙之象。", love: "雙方溝通不明，像隔著一層霧，需多花時間互相瞭解，切勿因猜疑而破壞感情。", love_en: "Communication is unclear. Spend time understanding each other; avoid suspicion.", wealth: "對市場狀況不熟悉，投資需謹慎，容易因判斷錯誤而受騙，建議先觀望或請教專家。", wealth_en: "Unfamiliar with the market. Be cautious of scams. Observe or consult experts.", career: "目前方向未明，經驗不足，不宜獨斷獨行，應虛心向職場前輩請教，學習新技能。", career_en: "Direction unclear. Lack of experience. Don't act alone; learn from mentors.", noble: "【東北方】有教育界或長輩指點迷津，能開啟智慧。", noble_en: "[Northeast] Educators or elders can guide you and open your wisdom.", advice: "虛心求教，去除心中迷霧，這是學習與成長的最佳時機，切勿自以為是。", advice_en: "Humbly seek advice. It's the best time to learn and grow. Don't be arrogant.", radar: [50, 40, 40, 70, 65] },
+            "6,1": { name: "水天需", name_en: "Waiting", level: "吉", desc: "密雲不雨，等待時機。", love: "緣分尚未成熟，不宜強求，保持平常心交往，等待最佳時機告白或求婚，成功率較高。", love_en: "Fate is not ripe. Don't force it. Wait for the best moment to confess or propose.", wealth: "目前財運平平，大筆進帳需等待，不宜躁進投資，適合儲蓄或規劃未來的理財方向。", wealth_en: "Average wealth. Big gains require waiting. Save and plan for the future.", career: "時機未到，懷才不遇是暫時的，應利用這段時間養精蓄銳，充實自己，等待機會來臨。", career_en: "Time hasn't come. Temporary setbacks. Use this time to improve yourself.", noble: "【正北方】有男性貴人，可能在飲食場合或聚會中遇見。", noble_en: "[North] Male nobles may be met at dining or social gatherings.", advice: "需者待也，飲食宴樂，放鬆心情耐心等待，時機一到自然水到渠成，急則亂事。", advice_en: "Waiting is key. Enjoy food and life. Patience brings success; haste brings ruin.", radar: [60, 50, 55, 60, 80] },
+            "1,6": { name: "天水訟", name_en: "Conflict", level: "凶", desc: "意見不合，易生爭端。", love: "雙方容易因小事發生口角，溝通不良，建議暫時冷靜，避免因一時衝動而說出傷人的話。", love_en: "Quarrels over trifles. Poor communication. Cool down to avoid hurtful words.", wealth: "容易發生合約糾紛或金錢爭執，簽署文件需特別小心，防破財，不宜進行合夥生意。", wealth_en: "Contract disputes or money fights. Be careful with documents. Avoid partnerships.", career: "職場上易與人犯沖，意見不合，建議低調行事，避免捲入派系鬥爭，明哲保身為上。", career: "Conflict at work. Keep a low profile. Avoid office politics.", noble: "【西北方】有法律或調解相關的專業人士，能協助化解紛爭。", noble_en: "[Northwest] Legal or mediation professionals can help resolve conflicts.", advice: "作事謀始，慎防訴訟糾紛，凡事以和為貴，退一步海闊天空，爭強好勝必有損傷。", advice_en: "Plan carefully to avoid lawsuits. Harmony is key. Retreating broadens horizons.", radar: [30, 40, 35, 20, 50] },
+            "8,6": { name: "地水師", name_en: "The Army", level: "吉", desc: "行軍用兵，需有紀律。", love: "感情關係較為複雜，可能面臨競爭者，需專一對待，展現誠意與決心方能贏得芳心。", love_en: "Complex relationships. Competitors exist. Be faithful and determined to win.", wealth: "險中求財，需有周詳的策略與紀律，如同行軍打仗，不宜投機取巧，正財可得。", wealth_en: "Wealth from risk. Requires strategy and discipline. No shortcuts.", career: "職場競爭激烈，需發揮領導才能與團隊合作精神，嚴守紀律，方能在競爭中脫穎而出。", career: "Fierce competition. Leadership and teamwork are essential to stand out.", noble: "【正北方】或【西南方】有具權威的長官或領導者相助。", noble_en: "[North/Southwest] Authoritative leaders or commanders will help.", advice: "師出有名，行事需光明正大，若心術不正則必敗，展現你的領導力與執行力。", advice_en: "Act with a just cause. Integrity leads to victory. Show leadership.", radar: [50, 60, 75, 65, 70] },
+            "6,8": { name: "水地比", name_en: "Holding Together", level: "大吉", desc: "親密比輔，相親相愛。", love: "感情融洽，彼此依賴，是告白、交往或結婚的好時機，雙方關係將更進一步。", love_en: "Harmonious relationship. Good time for confession or marriage. Deepening bonds.", wealth: "利於合作生財，尋找合夥人或團隊合作將帶來豐厚的收益，人脈即是錢脈。", wealth_en: "Cooperation brings wealth. Partnerships are profitable. Network is net worth.", career: "人際關係極佳，得道多助，容易獲得同事與上司的支持，適合推動需要團隊合作的專案。", career: "Excellent interpersonal relations. Support from colleagues helps teamwork.", noble: "【身邊親友】皆可能是貴人，多參與社交活動有助運勢。", noble_en: "[Close Friends/Family] are your nobles. Socializing boosts luck.", advice: "以誠待人，廣結善緣，建立良好的人際網絡是你成功的關鍵，切勿孤僻獨行。", advice_en: "Treat others with sincerity. Build a good network. Don't be isolated.", radar: [95, 80, 85, 90, 85] },
+            "5,1": { name: "風天小畜", name_en: "The Taming Power of the Small", level: "平", desc: "密雲不雨，蓄積力量。", love: "感情小有波折，雙方溝通出現小障礙，需多點耐心去化解，目前不宜有太大的進展。", love_en: "Minor setbacks. Communication barriers. Be patient; don't push for progress.", wealth: "小財可得，大財未至，目前適合小額投資或儲蓄，不宜進行大規模的資金調度。", wealth_en: "Small gains only. Save or invest small amounts. Avoid large capital moves.", career: "工作進展緩慢，受限於環境或資源不足，不可操之過急，宜累積實力，等待機會。", career: "Slow progress due to limited resources. Accumulate strength and wait.", noble: "【東南方】有助力，多為同輩或年輕朋友。", noble_en: "[Southeast] Peers or young friends offer help.", advice: "時機未到，宜累積資源與實力，切勿強行推動計畫，小步快走勝過大步跌倒。", advice_en: "Accumulate resources. Don't force plans. Small steps are better than stumbling.", radar: [60, 55, 60, 50, 70] },
+            "1,2": { name: "天澤履", name_en: "Treading", level: "平", desc: "如履薄冰，謹慎小心。", love: "相處需注重禮節與分寸，避免因太過隨便而惹惱對方，尊重是維繫感情的關鍵。", love_en: "Mind your manners. Don't be too casual. Respect is key to the relationship.", wealth: "投資風險雖有，但只要謹慎評估，仍可獲利，切勿貪圖高報酬而忽視潛在危機。", wealth_en: "Risky investments. Careful evaluation yields profit. Don't ignore dangers.", career: "職場上伴君如伴虎，應對進退需得體，遵守公司規範，切勿挑戰上司權威。", career: "Tread carefully at work. Follow rules and respect authority.", noble: "【西方】有嚴厲的長輩或上司，雖嚴格但能給予正確指導。", noble_en: "[West] Strict elders or bosses give correct guidance.", advice: "行事依禮，雖危無咎，只要小心謹慎，步步為營，就能平安度過難關。", advice_en: "Act with propriety. Caution ensures safety even in danger.", radar: [50, 60, 65, 55, 60] },
+            "8,1": { name: "地天泰", name_en: "Peace", level: "大吉", desc: "三陽開泰，萬事亨通。", love: "情投意合，天作之合，雙方默契極佳，是論及婚嫁或讓感情升溫的最佳時機。", love_en: "Perfect match. Great chemistry. Best time for marriage or deepening love.", wealth: "財源廣進，無往不利，過去的投資開始獲利，正財偏財皆旺，適合擴大投資。", wealth_en: "Wealth flows in. Investments pay off. Good for expansion.", career: "運勢順風順水，阻礙消除，昇遷有望，創業或新計畫皆能順利推展，大有可為。", career: "Smooth sailing. Obstacles removed. Promotion or new ventures likely.", noble: "【四面八方】皆有貴人，尤其留意長輩與有力人士。", noble_en: "[All Directions] Nobles everywhere, especially elders and powerful people.", advice: "運勢極佳，把握良機全力衝刺，但仍需保持謙虛，居安思危，方能長久。", advice_en: "Great luck. Seize the moment. Stay humble and vigilant for longevity.", radar: [95, 95, 95, 95, 90] },
+            "1,8": { name: "天地否", name_en: "Standstill", level: "大凶", desc: "陰陽不交，諸事不順。", love: "雙方貌合神離，溝通困難，容易冷戰或產生誤會，建議暫時分開冷靜一下。", love_en: "Disconnected. Poor communication. Cold wars likely. Take a break.", wealth: "財運不佳，入不敷出，容易有意外支出，宜節流守財，不宜進行任何投資。", wealth_en: "Bad luck. Expenses exceed income. Save money; avoid investments.", career: "職場上小人當道，懷才不遇，努力難有回報，建議低調行事，勿強出頭，等待時機。", career: "Villains in power. Talent unrecognized. Keep a low profile and wait.", noble: "貴人遠離，需【自求多福】，靠自己的意志力撐過難關。", noble_en: "Nobles are far. Rely on yourself and willpower to survive.", advice: "閉塞之時，宜退守修身，不宜進取，多讀書充實自己，等待否極泰來。", advice_en: "Time of stagnation. Retreat and self-improve. Do not advance.", radar: [20, 25, 30, 20, 40] },
+            "1,3": { name: "天火同人", name_en: "Fellowship with Men", level: "吉", desc: "與人和同，光明磊落。", love: "關係公開透明，受到眾人祝福，單身者多參加聚會可遇良緣，有伴者感情穩定。", love_en: "Transparent relationship blessed by others. Singles meet matches at parties.", wealth: "合作得利，適合與人共同開發項目或合夥投資，公開透明的財務規劃有利。", wealth_en: "Profit from cooperation. Partnerships work well with transparent finances.", career: "團隊默契佳，成效顯著，適合推動需要跨部門合作的計畫，人際關係是成功關鍵。", career: "Great teamwork. Cross-department projects succeed. Networking is key.", noble: "【南方】有志同道合的朋友或夥伴相助。", noble_en: "[South] Like-minded friends or partners offer help.", advice: "公正無私，利涉大川，與人合作需坦誠相待，共享利益，方能成就大事。", advice_en: "Be fair and selfless. Honest cooperation brings great success.", radar: [85, 80, 90, 90, 85] },
+            "3,1": { name: "火天大有", name_en: "Possession in Great Measure", level: "大吉", desc: "如日中天，盛大豐有。", love: "熱情如火，光彩奪目，感情生活豐富多彩，但需防多角戀情，專一才能長久。", love_en: "Passionate and brilliant. Avoid love triangles; loyalty lasts.", wealth: "財運亨通，收穫豐碩，正財運極強，投資理財皆有斬獲，是累積財富的好時機。", wealth_en: "Prosperous wealth. Strong primary income. Great time to accumulate.", career: "領導群倫，事業達到巔峰，受人敬重，適合帶領團隊衝刺，決策多能正確。", career: "Career peak. Respected leadership. Good for leading teams.", noble: "【南方】或【西北方】有強力貴人，多為有權勢者。", noble_en: "[South/Northwest] Powerful nobles or authority figures.", advice: "滿招損，謙受益，切勿因成功而驕傲自大，應多做善事，回饋社會。", advice_en: "Pride brings loss; humility brings gain. Don't be arrogant; give back.", radar: [90, 95, 100, 90, 90] },
+            "8,7": { name: "地山謙", name_en: "Modesty", level: "吉", desc: "謙謙君子，卑以自牧。", love: "互敬互愛，平淡是福，不追求轟轟烈烈，細水長流的感情最為真實可靠。", love_en: "Mutual respect. Simple happiness. Long-lasting love is reliable.", wealth: "穩健獲利，不求暴利，適合穩健型的投資理財，低調更能守住財富。", wealth_en: "Steady profits. Avoid high risks. Low profile keeps wealth safe.", career: "虛懷若谷，工作態度認真負責，受人敬重，雖無大起大落，但穩步上升。", career: "Humble and responsible. Respected work attitude. Steady rise.", noble: "【東北方】有低調的實力派人士或隱士。", noble_en: "[Northeast] Low-key capable people or hermits.", advice: "謙受益，退一步海闊天空，保持謙虛低調的態度，將為你帶來長遠的好運。", advice_en: "Modesty brings benefits. Stepping back opens horizons. Stay humble.", radar: [80, 75, 80, 95, 85] },
+            "4,8": { name: "雷地豫", name_en: "Enthusiasm", level: "吉", desc: "雷出地奮，歡樂愉悅。", love: "感情順利，快樂無比，適合約會出遊，增進彼此感情，單身者桃花運旺。", love_en: "Happy relationship. Good for dates. Singles have strong romance luck.", wealth: "意外之財，手氣佳，可能有中獎或分紅的小確幸，但不可沉迷賭博。", wealth_en: "Windfall luck. Lottery or bonuses possible. Don't gamble excessively.", career: "順勢而為，工作氛圍輕鬆愉快，計畫能順利達成，適合從事娛樂或創意產業。", career: "Follow the flow. Happy work environment. Good for creative industries.", noble: "【東方】有助力，多為年輕人或充滿活力的人。", noble_en: "[East] Young or energetic people offer help.", advice: "居安思危，勿沉迷逸樂，快樂之餘仍需保持清醒，為未來做打算。", advice_en: "Be vigilant in peace. Don't indulge in pleasure. Plan for the future.", radar: [85, 85, 80, 80, 80] },
+            "2,4": { name: "澤雷隨", name_en: "Following", level: "吉", desc: "隨遇而安，順其自然。", love: "夫唱婦隨，順從對方的意見可減少爭執，隨緣發展，不強求反而有驚喜。", love_en: "Harmony by following. Reduce conflict by agreeing. Go with the flow.", wealth: "隨機應變，可得小財，不宜固執己見，跟隨市場趨勢調整投資策略。", wealth_en: "Adapt for small gains. Don't be stubborn. Follow market trends.", career: "跟隨明主，不宜獨斷，適合配合團隊或上司的指令行動，隨機應變能解決問題。", career: "Follow a good leader. Don't act alone. Adaptability solves problems.", noble: "【東方】或【西方】有善於交際的朋友。", noble_en: "[East/West] Sociable friends.", advice: "隨時變通，不可固執，放下身段適應環境，順水推舟能事半功倍。", advice_en: "Be flexible. Adapt to the environment. Go with the current.", radar: [75, 70, 70, 75, 75] },
+            "7,5": { name: "山風蠱", name_en: "Work on what has been spoiled", level: "凶", desc: "器皿生蟲，內部腐敗。", love: "感情生變，需防第三者介入，或雙方累積已久的矛盾爆發，需徹底溝通。", love_en: "Relationship changes. Beware of third parties or old conflicts erupting.", wealth: "投資失利，需防詐騙或內部管理不善造成的虧損，理財需重新整頓。", wealth_en: "Investment loss. Beware of scams or mismanagement. Reorganize finances.", career: "積弊已深，組織內部混亂，需大刀闊斧進行改革，否則將面臨衰敗。", career: "Deep-rooted problems. Chaos. Radical reform is needed to avoid decay.", noble: "【東北方】有能指出缺點的諍友，雖逆耳但忠言。", noble_en: "[Northeast] Critics who point out flaws are your true friends.", advice: "振作精神，革除舊弊，面對問題不要逃避，徹底解決才能重生。", advice_en: "Refresh yourself. Remove old abuses. Solve problems to be reborn.", radar: [30, 25, 30, 40, 45] },
+            "8,2": { name: "地澤臨", name_en: "Approach", level: "吉", desc: "居高臨下，親臨視察。", love: "積極主動，關係進展迅速，適合主動出擊追求，展現你的誠意與魅力。", love_en: "Be proactive. Rapid progress. Good time to pursue love with sincerity.", wealth: "財運看漲，把握時機進場，眼光獨到能發現潛在商機，短期獲利可期。", wealth_en: "Wealth rising. Enter the market now. Spot potential opportunities.", career: "管理有方，權力增加，適合親自督導專案，展現領導力，下屬會給予支持。", career: "Good management. Increased power. Supervise personally and lead.", noble: "【西南方】有女性長輩或主管相助。", noble_en: "[Southwest] Female elders or supervisors provide help.", advice: "至於八月有凶，需防變故，趁運勢好時加緊努力，居安思危防患未然。", advice_en: "Misfortune may come later. Work hard now and prepare for changes.", radar: [80, 85, 90, 80, 80] },
+            "5,8": { name: "風地觀", name_en: "Contemplation", level: "平", desc: "風行地上，觀察萬物。", love: "靜觀其變，不宜躁進，目前適合多觀察對方的人品與個性，不急著下決定。", love_en: "Observe quietly. Don't rush. Study their character before deciding.", wealth: "觀望市場，不宜入場，目前市場局勢不明朗，多做功課研究比實際操作重要。", wealth_en: "Watch the market. Don't enter yet. Research is more important than action.", career: "考察階段，多看少做，適合進行市場調查或學習新知，等待更好的時機。", career: "Observation phase. Watch more, do less. Learn and wait.", noble: "【東南方】有有遠見的長者或導師。", noble_en: "[Southeast] Far-sighted elders or mentors.", advice: "誠心觀察，等待時機，透過觀察洞悉事物本質，切勿盲目跟風。", advice_en: "Observe sincerely. Wait for the right time. Don't follow blindly.", radar: [50, 50, 60, 70, 65] },
+            "3,4": { name: "火雷噬嗑", name_en: "Biting Through", level: "平", desc: "咬碎硬物，刑罰糾紛。", love: "爭執摩擦多，需多磨合，雙方個性皆強，需透過溝通甚至爭吵來解決問題。", love_en: "Friction and arguments. Strong personalities. Resolve through communication.", wealth: "防口舌之災，易有罰單或法律糾紛導致破財，行事需守法，避免投機。", wealth_en: "Legal disputes or fines. Obey laws to avoid financial loss.", career: "排除障礙，過程強硬，職場上可能會遇到頑強的阻礙，需拿出魄力解決。", career: "Obstacles require forceful removal. Show determination to solve issues.", noble: "【南方】或【東方】有執法公正的人或律師。", noble_en: "[South/East] Law enforcement or lawyers.", advice: "恩威並施，鏟除障礙，面對困難不能手軟，該斷則斷，公正處理。", advice_en: "Use both kindness and severity. Remove obstacles firmly and fairly.", radar: [40, 45, 55, 30, 50] },
+            "7,3": { name: "山火賁", name_en: "Grace", level: "平", desc: "飾外實內，文飾美化。", love: "注重外表，浪漫多彩，約會氣氛佳，但需注意是否只有表面功夫，缺乏心靈交流。", love_en: "Focus on appearance. Romantic but superficial. Ensure emotional connection.", wealth: "小利可圖，重包裝行銷，適合從事與美學、設計相關的投資，但需防虛有其表。", wealth_en: "Small profits from packaging/design. Beware of style over substance.", career: "表面光鮮，需充實內涵，適合公關、廣告等行業，但切記不可誇大其詞。", career: "Glamorous surface. Enrich your substance. Good for PR/Advertising.", noble: "【東北方】有藝術、設計相關人士。", noble_en: "[Northeast] Arts or design professionals.", advice: "不可虛有其表，需務實，在追求外在美好的同時，也要充實內在實力。", advice_en: "Don't be superficial. Be practical and substantiate your inner self.", radar: [75, 60, 65, 70, 70] },
+            "7,8": { name: "山地剝", name_en: "Splitting Apart", level: "大凶", desc: "山附於地，剝落之象。", love: "感情轉淡，面臨分離，對方可能變心或關係逐漸疏遠，需做好心理準備。", love_en: "Fading love. Separation likely. Prepare for distance or a change of heart.", wealth: "財運流失，謹慎理財，易有大筆支出或虧損，不宜投資，宜守住現金。", wealth_en: "Financial loss. Manage money carefully. Keep cash; avoid investing.", career: "小人得志，基礎動搖，可能面臨裁員或降職，局勢對你不利，宜低調自保。", career: "Villains prosper. Foundation shaken. Layoffs possible. Keep low profile.", noble: "暫無貴人，需【自保】，切勿輕信他人。", noble_en: "No nobles. Protect yourself. Do not trust others easily.", advice: "局勢不利，宜隱忍待變，切勿與人正面衝突，留得青山在，不怕沒柴燒。", advice_en: "Unfavorable situation. Endure and wait. Avoid conflict to survive.", radar: [20, 20, 25, 15, 30] },
+            "8,4": { name: "地雷復", name_en: "Return", level: "中吉", desc: "一陽來復，萬物更新。", love: "破鏡重圓，舊情復燃，或是新戀情的萌芽，感情運勢回升，值得把握。", love_en: "Reunion or new love. Relationship luck is returning. Seize it.", wealth: "失而復得，財運回升，過去的虧損有望彌補，新的賺錢機會出現。", wealth_en: "Recovered losses. Wealth returns. New opportunities arise.", career: "東山再起，新的開始，適合展開新計畫或轉換跑道，充滿希望與生機。", career: "Comeback. New beginnings. Good for new plans or career changes.", noble: "【西南方】或【東方】有老朋友或舊識相助。", noble_en: "[Southwest/East] Old friends or acquaintances.", advice: "循環往復，生機再現，把握重新開始的機會，勿重蹈覆徹，穩步向前。", advice_en: "Cycles return. Life renews. Start again but avoid past mistakes.", radar: [70, 75, 80, 75, 85] },
+            "1,4": { name: "天雷無妄", name_en: "Innocence", level: "吉", desc: "天雷震驚，真實無妄。", love: "真誠相待，不可欺瞞，感情建立在信任基礎上，若有虛假將導致關係破裂。", love_en: "Be sincere. No deception. Trust is the foundation; lies break it.", wealth: "正當獲利，勿貪偏財，適合腳踏實地的賺錢方式，投機行為將帶來損失。", wealth_en: "Legitimate profits only. Avoid greed and speculation. Work hard.", career: "腳踏實地，必有回報，不走捷徑，按部就班完成工作，將獲得應有的肯定。", career: "Hard work pays off. No shortcuts. Follow steps for recognition.", noble: "【西北方】有正直無私的人。", noble_en: "[Northwest] Honest and selfless people.", advice: "心存正念，勿起貪念，保持純真的心，順應自然規律，好運自然來。", advice_en: "Keep a pure mind. Avoid greed. Follow nature's law for good luck.", radar: [80, 80, 85, 80, 80] },
+            "7,1": { name: "山天大畜", name_en: "The Taming Power of the Great", level: "吉", desc: "積蓄力量，大有可為。", love: "感情深厚，長久之計，雙方關係穩定，適合共同規劃未來，家庭生活美滿。", love_en: "Deep affection. Long-term plans. Stable relationship and happy family.", wealth: "儲蓄致富，不動產佳，適合長期投資或置產，財富是靠時間累積而來的。", wealth_en: "Wealth from savings. Real estate is good. Accumulate over time.", career: "才華洋溢，蓄勢待發，過去的努力即將開花結果，或是正在學習重要技能。", career: "Talent abounds. Ready to launch. Efforts will soon bear fruit.", noble: "【東北方】有大貴人，多為德高望重的長輩。", noble_en: "[Northeast] Great nobles, mostly respected elders.", advice: "多學多聞，厚積薄發，持續充實自己，等待時機一飛沖天。", advice_en: "Learn more. Accumulate strength. Wait for the moment to soar.", radar: [85, 90, 90, 90, 85] },
+            "7,4": { name: "山雷頤", name_en: "The Corners of the Mouth", level: "平", desc: "頤養身心，病從口入。", love: "注重精神交流，也需注意言語溝通，避免禍從口出傷了和氣。", love_en: "Focus on spiritual connection. Watch your words to avoid conflict.", wealth: "靠口才生財，飲食業有利，但需注意交際應酬的開銷，避免浪費。", wealth_en: "Wealth from speech or food. Watch entertainment expenses.", career: "言語謹慎，休養生息，適合從事教育、醫療或餐飲業，注意職場言行。", career: "Be careful with words. Rest. Good for education/medical/food sectors.", noble: "【東北方】有醫師或營養師給予健康建議。", noble_en: "[Northeast] Doctors or nutritionists.", advice: "慎言語，節飲食，養正，關注身心健康，說話要謹慎，飲食要節制。", advice_en: "Watch words and diet. Nurture yourself. Focus on health.", radar: [60, 65, 60, 65, 50] },
+            "2,5": { name: "澤風大過", name_en: "Preponderance of the Great", level: "凶", desc: "棟樑彎曲，壓力過大。", love: "負擔過重，愛得很累，這段感情讓你感到壓力巨大，可能是不對等的關係。", love_en: "Heavy burden. Exhausting love. Unequal relationship causing stress.", wealth: "花費過度，入不敷出，財務壓力大，需重新檢視開銷，避免債務纏身。", wealth_en: "Overspending. Debt risk. Review expenses to avoid trouble.", career: "責任重大，獨木難支，接下了超出能力的任務，壓力瀕臨極限，需尋求支援。", career: "Huge responsibility. Overwhelmed. Seek support before breaking.", noble: "【西方】有能分擔壓力的朋友。", noble_en: "[West] Friends who can share the burden.", advice: "量力而為，適時尋求協助，不要硬撐，放下不必要的負擔才能走得更遠。", advice_en: "Know your limits. Ask for help. Don't push too hard.", radar: [30, 25, 40, 40, 30] },
+            "6,6": { name: "坎為水", name_en: "The Abysmal", level: "大凶", desc: "重重險阻，水深火熱。", love: "陷入苦戀，無法自拔，或是遇到爛桃花，感情世界充滿淚水與不安。", love_en: "Painful love. Cannot escape. Tears and insecurity fill the relationship.", wealth: "周轉不靈，資金凍結，面臨嚴重的財務危機，需謹慎處理債務問題。", wealth_en: "Insolvent. Funds frozen. Severe financial crisis. Handle debt carefully.", career: "困難重重，進退維谷，職場環境險惡，或面臨失業危機，需堅強面對。", career: "Obstacles everywhere. Dilemma. Toxic environment or job loss risk.", noble: "無力相助，需靠【自己的意志】撐過去。", noble_en: "No help. Rely on your own WILLPOWER to survive.", advice: "習坎入險，守信可脫困，保持信心與誠信，不要放棄希望，終能度過難關。", advice_en: "Danger abounds. Integrity brings escape. Don't lose hope.", radar: [10, 15, 20, 20, 30] },
+            "3,3": { name: "離為火", name_en: "The Clinging, Fire", level: "吉", desc: "光明亮麗，依附之象。", love: "熱烈如火，但需專一，感情發展迅速，但來得快去得也快，需細心經營。", love_en: "Passionate but needs focus. Fast love needs care to last.", wealth: "財來財去，注意開銷，表面風光但實際盈餘不多，需做好財務控管。", wealth_en: "Money comes and goes. Flashy but low savings. Control finances.", career: "才華顯露，需依附大公司或強者，單打獨鬥較難成功，合作能互利共生。", career: "Talent shows. Rely on big companies or strong leaders. Don't go alone.", noble: "【南方】有貴人相助，多為同輩或合作夥伴。", noble_en: "[South] Peers or partners will help.", advice: "柔順中正，依附正道，像火一樣依附薪柴才能燃燒，找對依靠很重要。", advice_en: "Cling to what is right. Find the right support to shine.", radar: [85, 75, 90, 85, 80] },
+            "2,7": { name: "澤山咸", name_en: "Influence", level: "吉", desc: "心有靈犀，感應道交。", love: "一見鍾情，心心相印，雙方互有好感，進展順利，是談戀愛的好時機。", love_en: "Love at first sight. Mutual connection. Great time for romance.", wealth: "憑直覺獲利，人緣財旺，適合從事公關、業務等需要人際互動的工作。", wealth_en: "Intuitive profit. Wealth from people skills. PR/Sales bring money.", career: "溝通順暢，合作愉快，與同事或客戶關係良好，業績自然提升。", career: "Smooth communication. Happy cooperation. Good relations boost performance.", noble: "【西方】或【東北方】有年輕異性或朋友。", noble_en: "[West/Northeast] Young opposite sex or friends.", advice: "虛心感應，心誠則靈，保持開放的心態，相信直覺，真誠待人。", advice_en: "Be open and sincere. Trust your intuition.", radar: [95, 80, 85, 90, 85] },
+            "4,5": { name: "雷風恆", name_en: "Duration", level: "吉", desc: "恆久不變，持之以恆。", love: "愛情長跑，穩定發展，感情進入穩定期，雖無激情但細水長流，適合結婚。", love_en: "Long-term love. Stable. Good for marriage despite less passion.", wealth: "固定收入，細水長流，不適合短期投機，長期投資或固定薪資較為穩當。", wealth_en: "Fixed income. Avoid speculation. Long-term investment is safe.", career: "堅守崗位，不易變動，在現有領域持續深耕，久了自然會成為專家。", career: "Stick to your post. Deepen skills in current field to become an expert.", noble: "【東方】或【東南方】有老同事或老鄰居。", noble_en: "[East/Southeast] Old colleagues or neighbors.", advice: "立不易方，勿隨意改變，堅持到底就是勝利，不要輕易放棄或轉向。", advice_en: "Stand firm. Don't change easily. Persistence brings victory.", radar: [90, 80, 85, 80, 90] },
+            "1,7": { name: "天山遯", name_en: "Retreat", level: "平", desc: "退避隱居，明哲保身。", love: "暫時分開，冷靜思考，雙方關係緊張，不如各退一步，給彼此空間。", love_en: "Take a break. Cool down. Give each other space.", wealth: "見好就收，落袋為安，投資宜出場觀望，不宜追高，以免套牢。", wealth_en: "Take profits. Wait and see. Don't chase highs.", career: "退居二線，或想跳槽，職場環境不利，適合暫時低調，或規劃退休、離職。", career: "Step back. Unfavorable environment. Keep low or plan exit.", noble: "無，小人當道，宜遠離是非。", noble_en: "No nobles. Villains present. Stay away from trouble.", advice: "小利貞，宜退不宜進，暫時的退讓是為了將來更好的前進，不要硬碰硬。", advice_en: "Retreat is better than advance. Avoid confrontation for now.", radar: [40, 50, 40, 30, 60] },
+            "4,1": { name: "雷天大壯", name_en: "The Power of the Great", level: "吉", desc: "雷在天上，聲勢浩大。", love: "積極追求，但勿衝動，展現自信雖好，但要顧及對方感受，避免嚇跑對方。", love_en: "Pursue actively but calmly. Confidence is good, but respect feelings.", wealth: "氣勢旺盛，大筆進出，財運強勁，但花費也大，需注意收支平衡。", wealth_en: "Strong cash flow. Big spending. Balance income and expenses.", career: "大步向前，開疆闢土，工作運勢強，適合執行大型計畫或創業，勇往直前。", career: "Stride forward. Expand territory. Good for big projects or startups.", noble: "【東方】有強力貴人，能給予實質幫助。", noble_en: "[East] Powerful nobles give real help.", advice: "非禮勿履，防剛愎自用，雖有力量但要遵守規範，切勿目中無人。", advice_en: "Follow rules. Don't be self-willed. Respect norms.", radar: [85, 90, 95, 85, 90] },
+            "3,8": { name: "火地晉", name_en: "Progress", level: "大吉", desc: "旭日東昇，步步高升。", love: "感情升溫，更進一步，關係明朗化，得到周遭親友的祝福，幸福美滿。", love_en: "Love warms up. Relationship clarifies. Blessed by others.", wealth: "財運看好，投資有利，正財偏財皆旺，是資產增值的好時機。", wealth_en: "Good financial outlook. Profitable investments. Asset value rises.", career: "升職加薪，前途光明，工作表現優異，受上司賞識，有晉升的機會。", career: "Promotion likely. Bright future. Performance appreciated by bosses.", noble: "【南方】有權勢之人或女性主管。", noble_en: "[South] Powerful people or female supervisors.", advice: "晝日三接，把握晉升良機，運勢如日東昇，應積極表現，爭取機會。", advice_en: "Rapid progress. Seize promotion opportunities. Show your best.", radar: [90, 95, 100, 95, 90] },
+            "8,3": { name: "地火明夷", name_en: "Darkening of the Light", level: "凶", desc: "光明受損，晦暗不明。", love: "感情受挫，有苦難言，可能遭遇背叛或地下情，心情低落。", love_en: "Frustrated love. Hidden suffering. Betrayal or secrets likely.", wealth: "投資失利，需防隱患，容易因判斷錯誤或被詐騙而破財，宜保守。", wealth_en: "Investment loss. Hidden dangers. Be conservative to avoid scams.", career: "才華被埋沒，受壓抑，職場環境黑暗，努力不被看見，需忍辱負重。", career: "Talent buried. Oppressed. Dark environment. Endure for now.", noble: "無，需【韜光養晦】，等待黎明。", noble_en: "No nobles. Hide your light and wait for dawn.", advice: "艱貞利貞，收斂光芒，現在不是強出頭的時候，低調沈潛以待時機。", advice_en: "Persist in difficulty. Hide your brilliance. Wait for the right time.", radar: [25, 20, 30, 20, 40] },
+            "5,3": { name: "風火家人", name_en: "The Family", level: "吉", desc: "言行有信，家庭和睦。", love: "家庭溫暖，婚嫁之喜，感情穩定，適合走入婚姻或享受家庭生活。", love_en: "Warm family. Marriage luck. Stable love suitable for settling down.", wealth: "家運興隆，衣食無憂，家庭財務狀況良好，適合為家人置產或投資。", wealth_en: "Prosperous family. Good finances. Buy property for family.", career: "內部團結，穩步發展，公司內部氣氛和諧，同事間互助合作，效率高。", career: "Internal unity. Steady development. Harmonious workplace.", noble: "【東南方】有家人或女性長輩。", noble_en: "[Southeast] Family members or female elders.", advice: "誠信待人，家和萬事興，重視家庭與內部溝通，是成功的基石。", advice_en: "Be sincere. Harmony in the family brings success.", radar: [95, 85, 80, 90, 90] },
+            "3,2": { name: "火澤睽", name_en: "Opposition", level: "凶", desc: "二女同居，志不同行。", love: "貌合神離，意見相左，雙方觀念差異大，難以溝通，容易發生爭吵。", love_en: "Estranged. Disagreement. Hard to communicate. Arguments likely.", wealth: "意見分歧，合作破局，合夥生意容易因理念不合而拆夥，財運不穩。", wealth_en: "Partnership failure due to disagreement. Unstable wealth.", career: "內部矛盾，人心向背，團隊凝聚力差，各行其是，工作難以推展。", career: "Internal conflict. Low morale. Hard to progress.", noble: "無，孤軍奮戰，需靠自己協調。", noble_en: "No nobles. Fight alone. Mediate yourself.", advice: "小事吉，大事不宜，目前只適合處理小事，重大決策宜暫緩。", advice_en: "Small matters ok, big matters bad. Delay major decisions.", radar: [30, 35, 40, 25, 50] },
+            "6,7": { name: "水山蹇", name_en: "Obstruction", level: "凶", desc: "高山險阻，寸步難行。", love: "情路坎坷，阻礙重重，可能是遠距離戀愛或家人反對，感到心力交瘁。", love_en: "Rocky road. Obstacles. Long distance or family opposition.", wealth: "破財消災，周轉困難，財務狀況吃緊，不宜借貸或擔保。", wealth_en: "Financial loss. Tight cash flow. Avoid loans.", career: "前途茫茫，宜守不宜進，工作遇到瓶頸，怎麼做都不順，建議暫停腳步。", career: "Uncertain future. Hold your ground. Bottlenecks everywhere.", noble: "【西南方】有利，【東北方】不利。", noble_en: "[Southwest] Favorable. [Northeast] Unfavorable.", advice: "知難而退，反身修德，遇到過不去的坎就先回頭，充實自己再出發。", advice_en: "Retreat from difficulty. Cultivate yourself before trying again.", radar: [20, 15, 20, 30, 35] },
+            "4,6": { name: "雷水解", name_en: "Deliverance", level: "吉", desc: "雷雨大作，解除困難。", love: "誤會冰釋，雨過天晴，之前的爭執或冷戰將結束，關係重修舊好。", love_en: "Misunderstandings cleared. Reconciliation after conflict.", wealth: "困境解除，債務還清，財務壓力減輕，開始有餘裕進行理財。", wealth_en: "Debts cleared. Financial pressure eased. Ready to invest.", career: "問題解決，重獲生機，困擾已久的工作難題終於找到解決方案。", career: "Problems solved. New life. Solutions found for old issues.", noble: "【西南方】有助，多為能解決問題的人。", noble_en: "[Southwest] Solvers help you.", advice: "赦過宥罪，把握時機，寬恕別人的過錯，把握重生的機會，行動要快。", advice_en: "Forgive others. Seize the moment. Act fast to recover.", radar: [70, 65, 75, 70, 75] },
+            "7,2": { name: "山澤損", name_en: "Decrease", level: "平", desc: "損下益上，先損後益。", love: "犧牲奉獻，不求回報，單方面付出較多，雖辛苦但能感動對方。", love_en: "Sacrifice without return. One-sided effort touches the heart.", wealth: "先失後得，佈施積德，短期的虧損是為了長期的獲利，做公益有助運勢。", wealth_en: "Lose first, gain later. Charity brings luck. Long-term gain.", career: "投入成本，等待回收，目前是耕耘期，需投入大量時間精力，暫無回報。", career: "Investment phase. Hard work now, rewards later.", noble: "【東北方】有願意吃虧或提供幫助的朋友。", noble_en: "[Northeast] Selfless friends help.", advice: "懲忿窒欲，損己利人，控制慾望與脾氣，多為他人著想，終有好報。", advice_en: "Control desires. Help others. Good karma will follow.", radar: [60, 50, 65, 70, 70] },
+            "5,4": { name: "風雷益", name_en: "Increase", level: "大吉", desc: "風雷激盪，利益眾生。", love: "互助互惠，感情增長，雙方能互相幫助，共同成長，感情更加深厚。", love_en: "Mutual benefit. Growth in love. Supporting each other.", wealth: "獲利豐厚，公益得財，財運極佳，做善事或投資公益事業會有意外收穫。", wealth_en: "Huge profits. Wealth from charity or public good.", career: "業務擴展，大有斬獲，工作順利，適合擴張版圖或接受新挑戰。", career: "Expansion. Great success. Take new challenges.", noble: "【東方】或【東南方】有大貴人相助。", noble_en: "[East/Southeast] Great nobles help.", advice: "見善則遷，有過則改，看到好的就學習，有錯就改，積極向上的態度帶來好運。", advice_en: "Follow the good. Correct mistakes. Positivity brings luck.", radar: [90, 95, 95, 90, 90] },
+            "2,1": { name: "澤天夬", name_en: "Break-through", level: "平", desc: "決斷剛毅，排除小人。", love: "斬斷爛桃花，態度堅決，面臨抉擇，該分手就分手，不要拖泥帶水。", love_en: "Cut bad ties. Be decisive. Break up if needed.", wealth: "結清債務，果斷止損，處理不良資產或債務，長痛不如短痛。", wealth_en: "Clear debts. Cut losses. Deal with bad assets now.", career: "開除不適任者，決策果斷，職場上需展現魄力，解決人事或制度問題。", career: "Fire incompetent staff. Make bold decisions. Fix systems.", noble: "【西方】有執法者或決策者。", noble_en: "[West] Enforcers or decision makers.", advice: "居健履柔，剛柔並濟，決策要果斷，但手段要圓融，以免引起反彈。", advice_en: "Be decisive but tactful. Avoid backlash.", radar: [50, 60, 75, 50, 60] },
+            "1,5": { name: "天風姤", name_en: "Coming to Meet", level: "平", desc: "風雲相遇，不期而遇。", love: "桃花運強，多豔遇，容易遇到短暫的激情，但需防爛桃花或不正常的關係。", love_en: "Strong romance luck. Brief encounters. Beware of bad flings.", wealth: "意外之財，機會難得，可能有突如其來的賺錢機會，但可能不長久。", wealth_en: "Windfall chance. Unexpected money but maybe short-lived.", career: "機遇來臨，需善加把握，會有意想不到的合作機會，但需仔細評估。", career: "Unexpected opportunities. Evaluate carefully before joining.", noble: "【西北方】有強勢的女性貴人。", noble_en: "[Northwest] Strong female nobles.", advice: "女壯，勿用取女，小心桃花劫，面對誘惑要保持定力，凡事隨緣。", advice_en: "Beware of temptation. Stay grounded. Let things happen naturally.", radar: [75, 80, 70, 60, 70] },
+            "2,8": { name: "澤地萃", name_en: "Gathering Together", level: "大吉", desc: "菁英薈萃，聚集之象。", love: "人氣旺盛，追求者眾，單身者選擇多，有伴者感情生活豐富熱鬧。", love_en: "Popularity. Many suitors. Rich social life.", wealth: "集資順利，財源滾滾，適合群眾募資或團購，聚沙成塔，財運亨通。", wealth_en: "Easy fundraising. Money flows in. Crowdfunding works.", career: "人才濟濟，業績長紅，團隊陣容堅強，向心力高，能創造卓越績效。", career: "Great talent pool. High performance. Strong team spirit.", noble: "【西方】有大貴人，多為群眾領袖。", noble_en: "[West] Great nobles, usually leaders.", advice: "除戎器，戒不虞，在順境中更要防範小人與意外，做好風險管理。", advice_en: "Prevent accidents. Guard against villains even in good times.", radar: [90, 95, 95, 95, 90] },
+            "8,5": { name: "地風升", name_en: "Pushing Upward", level: "吉", desc: "積土成山，步步高升。", love: "感情穩定，逐漸加溫，關係像爬樓梯一樣，一步步往上走，越來越好。", love_en: "Stable love. Warming up. Relationship improves step by step.", wealth: "穩健成長，積少成多，財富隨著時間累積，適合定期定額投資。", wealth_en: "Steady growth. Accumulate wealth. Regular investment works.", career: "順利升遷，按部就班，工作表現受到肯定，職位與薪水同步成長。", career: "Promotion likely. Step-by-step career growth. Recognition gained.", noble: "【南方】有貴人提拔。", noble_en: "[South] Nobles promote you.", advice: "南征吉，順勢而上，設定目標，堅持努力，成功指日可待。", advice_en: "Go South. Move up. Success comes with persistence.", radar: [85, 85, 90, 85, 85] },
+            "2,6": { name: "澤水困", name_en: "Oppression", level: "大凶", desc: "澤中無水，困頓之象。", love: "感情枯竭，陷入僵局，彼此無話可說，或因現實問題感到疲憊不堪。", love_en: "Love exhausted. Deadlock. Tired of reality.", wealth: "資金短缺，周轉困難，錢財被套牢，經濟壓力大，需縮衣節食。", wealth_en: "Short of funds. Money stuck. High pressure. Be frugal.", career: "才華受限，有志難伸，身處惡劣環境，能力無法發揮，感到挫折。", career: "Talent restricted. Ambition blocked. Harsh environment.", noble: "大人吉，需靠【西方】的大人物解圍。", noble_en: "Rely on great people from the [West] to solve problems.", advice: "致命遂志，堅守正道，在困境中更要堅持原則，等待脫困的機會。", advice_en: "Stick to principles in hardship. Wait for the way out.", radar: [20, 15, 25, 30, 25] },
+            "6,5": { name: "水風井", name_en: "The Well", level: "吉", desc: "井養萬物，取之不盡。", love: "互相扶持，細水長流，感情像井水一樣深邃，雖無波瀾但源源不絕。", love_en: "Mutual support. Lasting love. Deep and endless affection.", wealth: "財源穩定，適合投資，被動收入增加，如同水井般提供穩定的現金流。", wealth_en: "Stable income. Good investment. Passive income flows.", career: "安守本分，服務眾人，工作性質穩定，適合堅守崗位，貢獻專業。", career: "Stable job. Serve others. Stick to your post.", noble: "【北方】有貴人，多為提供資源的人。", noble_en: "[North] Nobles providing resources.", advice: "井收勿幕，資源共享，大方分享你的資源與知識，會獲得更多回報。", advice_en: "Share resources. Don't hide knowledge. Giving brings returns.", radar: [75, 75, 70, 75, 80] },
+            "2,3": { name: "澤火革", name_en: "Revolution", level: "平", desc: "水火相息，變革更新。", love: "舊情已逝，尋找新歡，感情面臨轉折點，可能分手或改變相處模式。", love_en: "Old love gone. New love comes. Turning point in relationship.", wealth: "改變策略，方能獲利，舊的賺錢方式已無效，需尋找新的投資管道。", wealth_en: "Change strategy. Old ways fail. Find new investments.", career: "轉職跳槽，改革創新，不滿現狀，想要改變環境或工作內容，是轉職的好時機。", career: "Change jobs. Innovate. Good time for career shift.", noble: "【南方】或【西方】有能帶來改變的人。", noble_en: "[South/West] People who bring change.", advice: "順天應人，改革弊端，該變則變，不要墨守成規，順應時勢才能生存。", advice_en: "Reform now. Don't stick to old ways. Adapt to survive.", radar: [60, 70, 85, 60, 70] },
+            "3,5": { name: "火風鼎", name_en: "The Cauldron", level: "大吉", desc: "去故取新，三足鼎立。", love: "新關係確立，穩定發展，感情進入新的階段，彼此承諾，關係穩固。", love_en: "New relationship established. Stable development. Commitment made.", wealth: "合作生財，大吉大利，三人行的合作模式最為有利，財源穩固。", wealth_en: "Wealth from cooperation. Tripartite partnerships are profitable.", career: "權力穩固，受人重用，在組織中佔有重要地位，決策具有影響力。", career: "Power secured. Valued by others. Influential decisions.", noble: "【南方】或【東南方】有貴人提攜。", noble_en: "[South/Southeast] Nobles promote you.", advice: "正位凝命，穩重行事，雖有權位但要穩重，不可輕浮，方能長久。", advice_en: "Be dignified. Act responsibly to maintain position.", radar: [85, 90, 95, 90, 90] },
+            "4,4": { name: "震為雷", name_en: "The Arousing", level: "平", desc: "雷聲震驚，恐懼修省。", love: "爭吵激烈，分合不定，感情充滿戲劇性，大吵大鬧，需防情緒失控。", love_en: "Intense quarrels. Unstable. Drama and emotional outbursts.", wealth: "震盪起伏，風險極大，股市或投資市場波動劇烈，心臟要夠強。", wealth_en: "Volatile market. High risk. Be mentally prepared.", career: "變動劇烈，需防震驚，職場可能有突發狀況或人事大地震，需保持冷靜。", career: "Drastic changes. Shocking news. Stay calm amidst chaos.", noble: "【東方】有能安撫人心的人。", noble_en: "[East] People who calm you down.", advice: "恐懼修省，笑言啞啞，遇到變故要冷靜反省，從容應對，終能化險為夷。", advice_en: "Reflect in fear. Handle changes calmly to survive.", radar: [45, 40, 50, 45, 55] },
+            "7,7": { name: "艮為山", name_en: "Keeping Still", level: "凶", desc: "兩山重疊，止步不前。", love: "感情停滯，難以溝通，彼此心有千千結，各執己見，互不相讓。", love_en: "Stagnant love. No communication. Stubbornness blocks progress.", wealth: "資金凍結，宜守財，投資項目停擺，錢財卡住動彈不得，宜靜觀其變。", wealth_en: "Frozen funds. Hold cash. Investments stuck. Wait.", career: "進度受阻，原地踏步，工作推動困難，阻礙重重，暫時無法突破。", career: "Blocked progress. Standing still. Hard to breakthrough.", noble: "無，需【自我反省】與沈澱。", noble_en: "No nobles. Self-reflection needed.", advice: "時止則止，動靜不失其時，該停就停，不要盲目衝刺，休息是為了走更長的路。", advice_en: "Stop when needed. Don't rush blindly. Rest to go further.", radar: [30, 35, 30, 30, 50] },
+            "5,7": { name: "風山漸", name_en: "Development", level: "吉", desc: "循序漸進，鴻雁高飛。", love: "依禮聘嫁，水到渠成，感情發展循序漸進，按傳統禮俗進行，結果圓滿。", love_en: "Gradual progress. Follow traditions. Happy ending.", wealth: "財運漸入佳境，財富是慢慢累積而來的，不要急於一時，終有所獲。", wealth_en: "Wealth grows slowly. Be patient. Success comes in time.", career: "穩步上升，不宜急進，職場地位慢慢提升，基礎打得穩，未來發展好。", career: "Steady rise. Don't rush. Solid foundation brings future success.", noble: "【東南方】有女性貴人相助。", noble_en: "[Southeast] Female nobles help.", advice: "女歸吉，按部就班，凡事照規矩來，不要想抄捷徑，穩健就是最快的方法。", advice_en: "Follow steps. No shortcuts. Steadiness wins.", radar: [85, 80, 85, 80, 85] },
+            "4,2": { name: "雷澤歸妹", name_en: "The Marrying Maiden", level: "凶", desc: "少女急嫁，名份不正。", love: "畸戀、三角關係，不長久，容易捲入不正常的感情關係，最終受傷。", love_en: "Illicit love. Triangles. Short-lived and hurtful.", wealth: "投機失利，貪小失大，因貪圖眼前小利而損失大筆金錢，切勿貪心。", wealth_en: "Speculation fails. Greed leads to big losses.", career: "職位不當，名實不符，擔任了不適合的職位，或工作內容與職稱不符。", career: "Mismatched job. Title doesn't fit reality.", noble: "無，需防【爛桃花】與誘惑。", noble_en: "No nobles. Beware of bad romance and temptation.", advice: "征凶，無所利，目前局勢不對，強行去做不會有好結果，宜暫緩。", advice_en: "Bad timing. Forcing things brings misfortune. Pause.", radar: [25, 30, 25, 20, 40] },
+            "4,3": { name: "雷火豐", name_en: "Abundance", level: "大吉", desc: "日中則昃，豐大亨通。", love: "熱情如火，但需防短暫，感情濃烈到了頂點，享受當下，但要為未來打算。", love_en: "Passionate love. Intense but maybe short. Plan for future.", wealth: "財運極佳，豐收之象，投資獲利豐厚，是收割成果的時候，要懂得守成。", wealth_en: "Great wealth. Harvest time. Keep what you earned.", career: "成就非凡，光耀門楣，事業達到巔峰，名利雙收，令人羨慕。", career: "Extraordinary success. Career peak. Fame and fortune.", noble: "【東方】或【南方】有強力助力。", noble_en: "[East/South] Strong help available.", advice: "勿憂，宜日中，把握當下最美好的時光，全力發揮，不要杞人憂天。", advice_en: "Don't worry. Seize the peak moment. Shine bright.", radar: [90, 95, 100, 90, 90] },
+            "3,7": { name: "火山旅", name_en: "The Wanderer", level: "平", desc: "火山旅居，不安定之象。", love: "聚少離多，感情不穩，可能因工作分居兩地，或心無定所，漂泊不定。", love_en: "Unstable love. Long distance or drifting apart.", wealth: "財來財去，開銷大，旅途中花費多，或因變動而損耗錢財，難以積蓄。", wealth_en: "Money comes and goes. High expenses. Hard to save.", career: "奔波勞碌，出差頻繁，工作性質需要到處跑，雖辛苦但能增長見聞。", career: "Busy traveling. Frequent trips. Hard work but gain experience.", noble: "【異鄉人】或外地朋友。", noble_en: "[Strangers] or friends from afar.", advice: "小亨，貞吉，隨遇而安，適應變動的環境，保持樂觀心態，亦有所獲。", advice_en: "Adapt to changes. Be optimistic. Wander but stay true.", radar: [40, 45, 50, 60, 55] },
+            "5,5": { name: "巽為風", name_en: "The Gentle", level: "吉", desc: "風行無阻，謙遜順從。", love: "猶豫不決，需多果斷，桃花雖多但難以抉擇，應聽從長輩意見或堅定心意。", love_en: "Indecisive. Many choices. Listen to elders or decide firmly.", wealth: "小利可圖，積少成多，像風一樣無孔不入，到處都有小賺錢的機會。", wealth_en: "Small profits everywhere. Accumulate slowly like wind.", career: "順應時勢，無孔不入，靈活應變，能適應各種環境，業務推廣順利。", career: "Adaptable. Flexible. Smooth business expansion.", noble: "【東南方】有能言善道的貴人。", noble_en: "[Southeast] Eloquent nobles.", advice: "利見大人，宜積極行動，不要猶豫，趕快行動，順著風向走就能成功。", advice_en: "Act now. Don't hesitate. Go with the wind.", radar: [65, 70, 75, 80, 75] },
+            "2,2": { name: "兌為澤", name_en: "The Joyous", level: "吉", desc: "兩澤相連，喜悅相通。", love: "甜蜜喜悅，溝通良好，兩人在一起充滿歡笑，適合約會、旅遊，感情加溫。", love_en: "Sweet and happy. Good communication. Joyful dating.", wealth: "和氣生財，交際得利，靠口才與人際關係賺錢，服務業或銷售業大吉。", wealth_en: "Wealth from harmony. Social skills bring money.", career: "口才極佳，說服力強，談判、演講或溝通協調的工作能展現長才。", career: "Great eloquence. Good for negotiation or speaking.", noble: "【西方】有年輕女性或朋友。", noble_en: "[West] Young women or friends.", advice: "麗澤兌，朋友講習，多與朋友交流分享，互相學習，能帶來快樂與收穫。", advice_en: "Share with friends. Learning together brings joy.", radar: [90, 85, 80, 90, 85] },
+            "5,6": { name: "風水渙", name_en: "Dispersion", level: "凶", desc: "風吹水散，渙散離散。", love: "緣分轉淡，面臨分離，感情像被風吹散一樣，難以挽回，需看開。", love_en: "Fading love. Separation likely. Hard to salvage.", wealth: "財運流失，需防破財，錢財守不住，可能有意外的耗損，不宜投資。", wealth_en: "Wealth scatters. Unexpected losses. Don't invest.", career: "組織鬆散，人心不齊，團隊士氣低落，人員流動率高，需重新凝聚共識。", career: "Disorganized. Low morale. High turnover. Needs unity.", noble: "【正北方】有能凝聚人心的人。", noble_en: "[North] People who can unite others.", advice: "利涉大川，宜出外發展，既然本地無法發展，不如遠走他鄉，尋求新機會。", advice_en: "Go abroad. Seek opportunities elsewhere if local fails.", radar: [30, 25, 35, 45, 50] },
+            "6,2": { name: "水澤節", name_en: "Limitation", level: "吉", desc: "蓄水成澤，節制有度。", love: "發乎情止乎禮，有節制，感情發展有分寸，不逾矩，雖不激情但穩定。", love_en: "Restrained love. Proper boundaries. Stable but not wild.", wealth: "量入為出，積存財富，懂得節省開支，做好理財規劃，財富慢慢累積。", wealth_en: "Live within means. Save money. Financial planning works.", career: "建立制度，依規行事，工作講究標準化與流程，遵守紀律能獲得肯定。", career: "Follow rules. Standardization. Discipline is rewarded.", noble: "【正北方】或【西方】有有原則的長輩。", noble_en: "[North/West] Principled elders.", advice: "苦節不可貞，當節則節，節制是好事，但不可過度苛刻，該放鬆時要放鬆。", advice_en: "Moderation is good, but don't be too harsh. Relax when needed.", radar: [70, 75, 70, 60, 80] },
+            "5,2": { name: "風澤中孚", name_en: "Inner Truth", level: "大吉", desc: "誠信在心，感化萬物。", love: "彼此信任，心靈契合，感情建立在深厚的信任基礎上，無需多言也能懂。", love_en: "Deep trust. Soulmates. Connection without words.", wealth: "信譽卓著，財源廣進，靠信用做生意，客戶忠誠度高，財源滾滾而來。", wealth_en: "Reputation brings wealth. Loyal customers. Money flows.", career: "誠信經營，獲得支持，工作態度誠懇，獲得上司與客戶的信賴。", career: "Honest business. Gaining support and trust.", noble: "【東南方】或【西方】有誠信之人。", noble_en: "[Southeast/West] Honest people.", advice: "信及豚魚，誠信為本，保持誠信，連動物都能被感化，何況是人，無往不利。", advice_en: "Sincerity moves all. Integrity is your greatest asset.", radar: [95, 90, 90, 95, 90] },
+            "4,7": { name: "雷山小過", name_en: "Preponderance of the Small", level: "平", desc: "飛鳥遺音，小有過越。", love: "小吵小鬧，不宜大事，感情有些小摩擦，但不影響大局，不宜在此時做重大決定。", love_en: "Small fights. Avoid big decisions. Minor friction only.", wealth: "小財可得，大財莫貪，適合小額投資或賺點外快，貪圖大立會失敗。", wealth_en: "Small gains. Don't be greedy. Avoid big risks.", career: "眼高手低，宜守本分，工作上可能有些小失誤，或目標訂得太高，需調整。", career: "Aim too high. Stay grounded. Adjust unrealistic goals.", noble: "無，需靠【自己】修正錯誤。", noble_en: "No nobles. Correct your own mistakes.", advice: "可小事，不可大事，處理生活瑣事尚可，大事不宜，低調過渡為佳。", advice_en: "Small things ok, big things no. Lay low.", radar: [45, 50, 45, 40, 60] },
+            "6,3": { name: "水火既濟", name_en: "After Completion", level: "大吉", desc: "水火相交，大功告成。", love: "修成正果，美滿幸福，感情有了完美的結果，結婚生子，家庭幸福。", love_en: "Perfect ending. Marriage and happiness. Fulfillment.", wealth: "獲利豐厚，完美收官，投資項目獲利了結，財務狀況達到最佳狀態。", wealth_en: "Profit taking. Perfect financial state. Success.", career: "功成名就，達到顛峰，任務圓滿完成，獲得極高的榮譽與評價。", career: "Mission accomplished. Peak success. High honor.", noble: "【正北方】或【南方】有助。", noble_en: "[North/South] Helpful nobles.", advice: "初吉終亂，需防盛極而衰，雖然現在很好，但要居安思危，防範未來的衰退。", advice_en: "Good start, beware of end. Stay vigilant at the peak.", radar: [95, 95, 95, 90, 90] },
+            "3,6": { name: "火水未濟", name_en: "Before Completion", level: "平", desc: "水火不交，未竟之志。", love: "時機未到，仍需努力，感情還未穩定，雙方還在磨合期，需要更多時間。", love_en: "Not yet ready. Needs effort. Relationship still forming.", wealth: "財運未通，需待時機，目前投資尚未獲利，或資金尚未到位，需耐心等待。", wealth_en: "Wealth blocked. Wait for timing. Funds not yet arrived.", career: "目標未達，尚需奮鬥，工作還在進行中，離成功還有一段距離，不可鬆懈。", career: "Goal not reached. Keep fighting. Don't relax yet.", noble: "【南方】有未來將出現的貴人。", noble_en: "[South] Future nobles will appear.", advice: "慎辨物居方，再接再厲，雖然尚未成功，但只要方向正確，堅持下去終會達成。", advice_en: "Persevere. Correct direction leads to eventual success.", radar: [50, 45, 50, 55, 60] }
+        };
+
+        // --- Helper: Generate English Interpretation ---
+        function getEnglishText(data) {
+            const levelMap = {
+                "大吉": "Excellent Luck",
+                "吉": "Good Luck",
+                "中吉": "Moderate Luck",
+                "平": "Average Luck",
+                "凶": "Bad Luck",
+                "大凶": "Disaster"
+            };
+            const levelEn = levelMap[data.level] || "Neutral";
+            return {
+                title: data.name_en,
+                level: levelEn,
+                desc: `Hexagram: ${data.name_en}. ${levelEn}. ${data.desc}`,
+                love: data.love_en,
+                wealth: data.wealth_en,
+                career: data.career_en,
+                noble: data.noble_en,
+                advice: data.advice_en,
+                ritual: `Recommended Ritual: ${levelEn.includes('Good') || levelEn.includes('Excellent') ? 'Wealth Blessing (Land Deity/Wealth God)' : 'Karma Cleansing (Tai Yi/Land Deity)'}.`
+            };
+        }
+
+        // --- Hashing Algorithm ---
+        function getDailyHexagram(name, dateObj) {
+            const dateStr = `${dateObj.getFullYear()}${dateObj.getMonth() + 1}${dateObj.getDate()}`;
+            const seedStr = (name || "Anonymous") + dateStr + "XiangSanOracleSalt2026";
+            let hash = 5381;
+            for (let i = 0; i < seedStr.length; i++) hash = ((hash << 5) + hash) + seedStr.charCodeAt(i);
+            hash = Math.abs(hash);
+            const upper = (hash % 8) + 1;
+            const lower = ((Math.floor(hash / 8)) % 8) + 1;
+            return { upper, lower };
+        }
+
+        function switchTab(mode) {
+             currentMode = mode;
+             const tabDate = document.getElementById('tab-date');
+             const tabRandom = document.getElementById('tab-random');
+             const viewDate = document.getElementById('mode-date');
+             const viewRandom = document.getElementById('mode-random');
+
+             if (mode === 'date') {
+                 updateTabStyle(tabDate, tabRandom);
+                 viewDate.classList.remove('hidden');
+                 viewRandom.classList.add('hidden');
+             } else {
+                 updateTabStyle(tabRandom, tabDate);
+                 viewDate.classList.add('hidden');
+                 viewRandom.classList.remove('hidden');
+             }
+         }
+
+        function updateTabStyle(active, inactive) {
+            active.className = "flex-1 py-3 text-sm font-serif font-bold rounded-md transition-all btn-gold shadow-md tracking-widest";
+            inactive.className = "flex-1 py-3 text-sm font-serif font-bold rounded-md transition-all text-lux-goldDim hover:text-lux-gold tracking-widest";
+        }
+
+        async function startDivination() {
+            let upper, lower;
+            if (currentMode === 'date') {
+                const nameStr = document.getElementById('dailyName').value.trim();
+                if (!nameStr) {
+                    upper = Math.floor(Math.random() * 8) + 1;
+                    lower = Math.floor(Math.random() * 8) + 1;
+                } else {
+                    const result = getDailyHexagram(nameStr, new Date());
+                    upper = result.upper;
+                    lower = result.lower;
+                }
+            } else {
+                upper = Math.floor(Math.random() * 8) + 1;
+                lower = Math.floor(Math.random() * 8) + 1;
+            }
+
+            document.getElementById('inputCard').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+
+            const loadingTexts = ["連結宇宙能量...", "解析卦象奧義...", "顯化天機...", "繪製能量圖譜..."];
+            let step = 0;
+            const interval = setInterval(() => {
+                if(step < loadingTexts.length) {
+                    document.getElementById('loadingText').innerText = loadingTexts[step];
+                    step++;
+                }
+            }, 800);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                renderResult(upper, lower);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('resultCard').classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 3200);
+        }
+
+        function renderResult(upper, lower) {
+            const key = `${upper},${lower}`;
+            const data = hexagramData[key] || hexagramData["1,1"]; // Fallback safe
+
+            const titleEl = document.getElementById('hexagramTitle');
+            const levelEl = document.getElementById('hexagramLevel');
+            const descEl = document.getElementById('hexagramDesc');
+            
+            if (currentLang === 'zh') {
+                titleEl.innerText = data.name;
+                levelEl.innerText = data.level;
+                descEl.innerText = `"${data.desc}"`;
+                document.getElementById('resLove').innerText = data.love;
+                document.getElementById('resWealth').innerText = data.wealth;
+                document.getElementById('resCareer').innerText = data.career;
+                document.getElementById('resNoble').innerText = data.noble;
+                document.getElementById('resLuck').innerText = data.advice;
+                
+                let ritualHTML = "";
+                if (data.level.includes("吉")) {
+                    ritualHTML = `<div class="mb-2"><span class="font-bold text-[#06C755]">【財庫豐盈】</span> 土地公與武財神補財庫</div><p class="text-xs text-gray-400 mb-2">簡介：趁運勢正旺，祈請正神加持先天與後天財庫，修補漏財缺口。</p>`;
+                } else if (data.level === "大凶") {
+                    ritualHTML = `<div class="mb-2"><span class="font-bold text-[#D93025]">【天界赦罪】</span> 玉皇赦罪 及 紫微赦罪科儀</div><p class="text-xs text-gray-400 mb-2">簡介：針對運勢低迷者，祈求開恩赦免，懺悔過往業障。</p>`;
+                } else { 
+                    ritualHTML = `<div class="mb-2"><span class="font-bold text-lux-gold">【補運解業】</span> 雙神補運 或 太乙解業</div><p class="text-xs text-gray-400 mb-1">1. 土地公與武財神補運。</p><p class="text-xs text-gray-400 mb-2">2. 太乙解業科儀化解冤親債主。</p>`;
+                }
+                document.getElementById('resRitual').innerHTML = ritualHTML;
+
+            } else {
+                const enData = getEnglishText(data);
+                titleEl.innerText = enData.title;
+                titleEl.style.fontFamily = "'Cinzel', serif";
+                levelEl.innerText = enData.level;
+                descEl.innerText = `"${enData.desc}"`;
+                document.getElementById('resLove').innerText = enData.love;
+                document.getElementById('resWealth').innerText = enData.wealth;
+                document.getElementById('resCareer').innerText = enData.career;
+                document.getElementById('resNoble').innerText = enData.noble;
+                document.getElementById('resLuck').innerText = enData.advice;
+                document.getElementById('resRitual').innerHTML = `<p class="text-xs text-gray-400">${enData.ritual}</p>`;
+            }
+            
+            // Badge
+            if (data.level.includes('吉')) levelEl.className = "bg-[#06C755] text-black text-xs font-serif font-bold px-3 py-1 rounded-full border border-white/20 shadow-lg";
+            else if (data.level.includes('凶')) levelEl.className = "bg-[#D93025] text-white text-xs font-serif font-bold px-3 py-1 rounded-full border border-white/20 shadow-lg";
+            else levelEl.className = "bg-lux-gold text-black text-xs font-serif font-bold px-3 py-1 rounded-full border border-black shadow-lg";
+
+            const godIndex = (upper * 8 + lower) % godList.length;
+            const godObj = godList[godIndex];
+            document.getElementById('resDeity').innerText = currentLang === 'zh' ? godObj.zh : godObj.en;
+
+            // Visual
+            const upLines = trigrams[upper].lines; 
+            const lowLines = trigrams[lower].lines;
+            let html = '';
+            for(let i=2; i>=0; i--) html += `<div class="hex-line ${upLines[i] ? '' : 'yin'}"></div>`;
+            html += `<div class="h-2"></div>`;
+            for(let i=2; i>=0; i--) html += `<div class="hex-line ${lowLines[i] ? '' : 'yin'}"></div>`;
+            document.getElementById('hexagramVisual').innerHTML = html;
+
+            renderChart(data.radar);
+        }
+
+        function renderChart(baseStats) {
+            const data = baseStats.map(v => Math.min(100, Math.max(0, v + Math.floor(Math.random() * 6 - 3))));
+            const ctx = document.getElementById('energyChart').getContext('2d');
+            const labels = currentLang === 'zh' ? ['愛情', '財運', '事業', '貴人', '健康'] : ['Love', 'Wealth', 'Career', 'Noble', 'Health'];
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: currentLang === 'zh' ? '五行能量' : 'Energy',
+                        data: data,
+                        fill: true,
+                        backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                        borderColor: '#FFD700',
+                        pointBackgroundColor: '#000',
+                        pointBorderColor: '#FFD700',
+                        pointHoverBackgroundColor: '#FFD700',
+                        pointHoverBorderColor: '#000'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    elements: { line: { borderWidth: 2 } },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: {
+                                font: { family: "'Noto Serif TC', serif", size: 12 },
+                                color: '#C5A059'
+                            },
+                            suggestedMin: 0, suggestedMax: 100, ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(20, 20, 20, 0.9)',
+                            titleFont: { family: "'Noto Serif TC', serif" },
+                            bodyFont: { family: "'Noto Sans TC', sans-serif" },
+                            titleColor: '#FFD700',
+                            bodyColor: '#FFF'
+                        }
+                    }
+                }
+            });
+        }
+
+        function resetApp() {
+            document.getElementById('resultCard').classList.add('hidden');
+            document.getElementById('inputCard').classList.remove('hidden');
+            if (chartInstance) chartInstance.destroy();
+        }
+    </script>
+</body>
+</html>
