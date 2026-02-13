@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 丙午年 武財神代補財庫 | 降叁 X 神霄玉府財神會館</title>
+    <title>2026 丙午年 武財神代補財庫 | 降叁 x 神霄玉府財神會館</title>
     <!-- 1. 載入 Tailwind CSS (美編樣式庫) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -39,7 +39,8 @@
       .custom-scrollbar::-webkit-scrollbar-track { background: rgba(28, 25, 23, 0.5); border-radius: 8px; }
       .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(202, 138, 4, 0.5); border-radius: 8px; }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(202, 138, 4, 0.8); }
-      input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; opacity: 0.6; }
+      /* 設定日期輸入框樣式，移除 invert 反轉，讓深色模式自動生效為白色 */
+      input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
       input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     </style>
 </head>
@@ -50,7 +51,6 @@
         const { useState, useEffect } = React;
 
         // --- 內建圖示組件 (SVG) ---
-        // 為了單一檔案運作，直接將圖示內嵌
         const Icons = {
             Shield: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
             Flame: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
@@ -64,10 +64,15 @@
             Sparkles: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M2 7h4"/><path d="M2 3h4"/></svg>,
             Star: ({size=24, className, fill="none"}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
             MessageCircle: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>,
-            Users: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Users: ({size=24, className}) => <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            AncientCoin: ({size=24, className}) => (
+                <svg width={size} height={size} className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9 9h6v6H9z" />
+                </svg>
+            )
         };
 
-        // --- 2026 丙午年 初一十五 基礎日程表 ---
         const baseSchedule = [
           { month: '正月', d1: '', d15: '2026-03-03' },
           { month: '二月', d1: '2026-03-19', d15: '2026-04-02' },
@@ -83,7 +88,6 @@
           { month: '十二月', d1: '2027-01-08', d15: '2027-01-22' },
         ];
 
-        // 計算是否為戊日，並回傳調整後的日期
         const getAdjustedDate = (dateString) => {
           if (!dateString) return null;
           const parts = dateString.split('-');
@@ -102,7 +106,6 @@
           return { original: dateString, actual: dateString, isDelayed: false };
         };
 
-        // --- 表單可選方案列表 ---
         const planOptions = [
           "【單次體驗】單次代補財庫 - NT$ 800"
         ];
@@ -112,16 +115,14 @@
           const [isSubmitting, setIsSubmitting] = useState(false);
           const [isSubmitted, setIsSubmitted] = useState(false);
           
-          // 取得報名截止基準日 (今天 + 5 天)
           const cutoffDate = new Date();
           cutoffDate.setDate(cutoffDate.getDate() + 5);
           const cutoffDateString = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, '0')}-${String(cutoffDate.getDate()).padStart(2, '0')}`;
 
-          // 表單狀態
           const [formData, setFormData] = useState({
             name: '', phone: '', address: '', 
             calendarType: '農曆', birthDate: '', birthTime: '吉時',
-            selectedDates: [], // 複選日期陣列
+            selectedDates: [],
             sessionType: planOptions[0],
             participantsCount: 1,
             additionalInfo: ''
@@ -140,12 +141,10 @@
             const { name, value } = e.target;
             setFormData(prev => ({ 
               ...prev, 
-              // 確保下拉選單的份數必定為整數數字，防止型別判定錯誤
               [name]: name === 'participantsCount' ? parseInt(value, 10) || 1 : value 
             }));
           };
 
-          // 處理日期複選的勾選邏輯
           const toggleDate = (dateActual) => {
             setFormData(prev => {
               const isSelected = prev.selectedDates.includes(dateActual);
@@ -157,7 +156,6 @@
             });
           };
 
-          // 新增：重置表單並回到報名頁的函式
           const handleReset = () => {
             setIsSubmitted(false);
             setFormData({
@@ -168,14 +166,12 @@
               participantsCount: 1,
               additionalInfo: ''
             });
-            // 自動捲動到表單頂部
             document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
           };
 
           const handleSubmit = async (e) => {
             e.preventDefault();
             
-            // 防呆：確保至少有勾選一個日期
             if (formData.selectedDates.length === 0) {
               alert("請至少選擇一個法會日期！");
               return;
@@ -183,10 +179,8 @@
 
             setIsSubmitting(true);
             
-            // ⚠️ Google Apps Script URL
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbww0p7OBKoVoC0kp2dDZzLWuHEalhGy-n-FxxKMT6zwCLcmpjQ6cG2C0fVGZjTq/exec';
             
-            // 計算本次訂單的總費用
             const calculatedTotal = 800 * parseInt(formData.participantsCount || 1, 10) * formData.selectedDates.length;
 
             const payload = {
@@ -196,7 +190,6 @@
               totalPrice: calculatedTotal
             };
 
-            // 除錯
             console.log("【資料送出檢查】準備送出給 Google 的資料包：", payload);
 
             try {
@@ -207,7 +200,6 @@
               });
               if (response.ok) {
                 setIsSubmitted(true);
-                // 自動捲動到最上方
                 document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
               } else {
                 alert("送出失敗，請稍後再試或聯繫 LINE 客服。");
@@ -220,18 +212,15 @@
             }
           };
 
-          // 總金額試算
           const totalPrice = 800 * parseInt(formData.participantsCount || 1, 10) * formData.selectedDates.length;
 
           return (
             <div className="relative min-h-screen text-stone-300 font-sans selection:bg-yellow-600 selection:text-white overflow-hidden bg-stone-950">
               
-              {/* 全站底圖：高級深邃無圖漸層與光暈 */}
               <div className="fixed inset-0 z-[-2] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-stone-900 via-stone-950 to-black"></div>
               <div className="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-yellow-600/10 blur-[120px] rounded-full pointer-events-none"></div>
               <div className="fixed bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-red-900/10 blur-[120px] rounded-full pointer-events-none"></div>
 
-              {/* Hero Section */}
               <header className="relative py-28 px-4 sm:px-8 border-b border-yellow-900/50 overflow-hidden min-h-[85vh] flex items-center justify-center">
                 <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-yellow-950/30 via-transparent to-transparent"></div>
 
@@ -246,15 +235,19 @@
                     財富如烈馬，祈請武財神來鎮守；<br />
                     <span className="text-yellow-400 font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">補庫不只是求財，更重要是守住你的財富。</span>
                   </p>
-                  <div className="pt-8">
+                  
+                  <div className="pt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <a href="#register" className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 text-stone-950 font-bold text-xl px-10 py-5 rounded-full hover:scale-105 transition-all shadow-[0_0_30px_rgba(234,179,8,0.4)] hover:shadow-[0_0_40px_rgba(234,179,8,0.7)]">
                       立即預約補財庫 <Icons.ArrowRight size={24} />
+                    </a>
+                    {/* 更新：連結 Portaly 網址，並使用古銅錢圖示 */}
+                    <a href="https://portaly.cc/bwa.bway2068" target="_blank" className="inline-flex items-center gap-2 border-2 border-stone-600 hover:border-yellow-600 text-stone-400 hover:text-yellow-500 font-bold text-xl px-10 py-5 rounded-full transition-all hover:scale-105">
+                      報名其他科儀 <Icons.AncientCoin size={24} />
                     </a>
                   </div>
                 </div>
               </header>
 
-              {/* Concept Section */}
               <section className="py-16 px-4 max-w-5xl mx-auto">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl font-bold text-yellow-500 mb-4 flex items-center justify-center gap-2">
@@ -316,7 +309,24 @@
                 </div>
               </section>
 
-              {/* Pricing & Plans Section */}
+              {/* NEW ADVERTISEMENT SECTION */}
+              <section className="py-8 px-4 max-w-5xl mx-auto">
+                <div className="relative w-full rounded-3xl overflow-hidden shadow-[0_0_30px_rgba(234,179,8,0.2)] border border-yellow-700/30 group">
+                  {/* 1200x450 廣告圖片放在這裡！請替換 src 內的網址 */}
+                  <img 
+                    src="https://images.unsplash.com/photo-1518182170546-07fb61292fa3?q=80&w=2000&auto=format&fit=crop" 
+                    alt="武財神宣傳廣告" 
+                    className="w-full h-48 md:h-80 object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-105"
+                  />
+                  {/* 示意文字標籤 (上線時可刪除這個 div) */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-black/60 backdrop-blur-md border border-yellow-500/30 text-yellow-100 px-6 py-3 rounded-full text-sm md:text-base font-bold tracking-wide">
+                      在此處放置您的活動文宣 (建議尺寸 1200x450)
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               <section className="py-20 bg-stone-900/40 backdrop-blur-sm border-t border-stone-800/50 px-4 relative">
                 <div className="max-w-6xl mx-auto space-y-12">
                   
@@ -329,7 +339,6 @@
                     </p>
                   </div>
 
-                  {/* 單次引流款 */}
                   <div className="max-w-4xl mx-auto bg-gradient-to-br from-stone-900 to-stone-950 backdrop-blur-xl border border-yellow-700/40 p-8 sm:p-10 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 hover:border-yellow-500 transition-all shadow-[0_0_50px_rgba(234,179,8,0.05)] relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-600/5 blur-[80px] rounded-full pointer-events-none"></div>
 
@@ -358,7 +367,6 @@
                 </div>
               </section>
 
-              {/* Schedule Table Section */}
               <section className="py-16 px-4 max-w-4xl mx-auto">
                 <div className="text-center mb-10">
                   <h2 className="text-3xl font-bold text-yellow-500 flex items-center justify-center gap-2 mb-4">
@@ -417,7 +425,6 @@
                 </div>
               </section>
 
-              {/* Feedback / Testimonials Section */}
               <section className="py-20 bg-stone-900/40 backdrop-blur-sm border-t border-stone-800/50 px-4">
                 <div className="max-w-6xl mx-auto space-y-12">
                   <div className="text-center space-y-4">
@@ -513,7 +520,6 @@
                 </div>
               </section>
 
-              {/* Registration Form */}
               <section id="register" className="py-20 px-4 max-w-3xl mx-auto">
                 <div className="bg-stone-900/80 backdrop-blur-md p-8 md:p-10 rounded-2xl shadow-2xl border-t-4 border-yellow-600 transition-all duration-500">
                   
@@ -536,7 +542,6 @@
                          </p>
                       </div>
 
-                      {/* 匯款資訊區塊 (感謝頁面版) */}
                       <div className="bg-gradient-to-b from-stone-900 to-stone-950 backdrop-blur-sm p-6 md:p-8 rounded-xl border border-yellow-700/50 space-y-4 shadow-lg relative overflow-hidden text-left">
                         <div className="absolute right-[-10%] top-[-20%] w-48 h-48 bg-yellow-600/10 blur-[60px] rounded-full pointer-events-none"></div>
                         
@@ -553,7 +558,6 @@
                             <span className="text-stone-400 font-sans text-sm">匯款帳號</span>
                             <span className="font-black text-yellow-400 text-2xl tracking-widest">059506013547</span>
                           </div>
-                          {/* 動態顯示總金額與報名細節 */}
                           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 mt-2 border-t border-stone-800 gap-2">
                             <span className="text-stone-400 font-sans text-sm">
                               本次共報名 {formData.participantsCount} 份，共 {formData.selectedDates.length} 場<br/>
@@ -575,13 +579,22 @@
                           <Icons.MessageCircle size={20} /> 前往 LINE@ 回報匯款資訊
                         </a>
                         
-                        {/* 新增：回到報名頁按鈕 */}
-                        <button 
-                          onClick={handleReset}
-                          className="w-full bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold py-4 rounded-xl transition-colors border border-stone-700 hover:border-stone-600 flex items-center justify-center gap-2"
-                        >
-                          返回重新報名
-                        </button>
+                        <div className="flex flex-col gap-4">
+                            <button 
+                              onClick={handleReset}
+                              className="w-full bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold py-4 rounded-xl transition-colors border border-stone-700 hover:border-stone-600 flex items-center justify-center gap-2"
+                            >
+                              返回重新報名
+                            </button>
+                            {/* 更新：感謝頁的連結與圖示也一併更新 */}
+                            <a 
+                              href="https://portaly.cc/bwa.bway2068" 
+                              target="_blank" 
+                              className="w-full bg-transparent hover:bg-stone-900 text-stone-500 hover:text-yellow-500 font-bold py-4 rounded-xl transition-colors border border-dashed border-stone-800 hover:border-yellow-600 flex items-center justify-center gap-2"
+                            >
+                              <Icons.AncientCoin size={20} /> 瀏覽並報名其他科儀
+                            </a>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -593,7 +606,6 @@
 
                       <form onSubmit={handleSubmit} className="space-y-6">
                         
-                        {/* 報名份數設定區塊 */}
                         <div className="bg-stone-950/60 backdrop-blur-sm p-6 rounded-xl border border-yellow-700/50 space-y-4 transition-all">
                           <label className="block text-sm font-medium text-yellow-500 mb-2 flex items-center gap-2">
                             <Icons.Users size={18} /> 請選擇報名份數
@@ -610,7 +622,6 @@
                             ))}
                           </select>
 
-                          {/* 動態顯示備註欄位 (超過1人時才顯示) */}
                           {formData.participantsCount > 1 && (
                             <div className="mt-6 pt-4 border-t border-stone-800 space-y-3 animate-fade-in">
                               <label className="block text-sm font-medium text-yellow-500">
@@ -618,7 +629,7 @@
                               </label>
                               <p className="text-xs text-stone-400 leading-relaxed">
                                 您選擇了 {formData.participantsCount} 份報名，請在此處填寫(包含您)所有參與者的資料以便撰寫疏文。<br/>
-                                <span className="text-yellow-600/90 font-medium">格式：姓名 / 國曆(或農曆) 生日 / 時辰 / 地址</span>
+                                <span className="text-yellow-600/90 font-medium">格式：姓名 / 西元國曆(或農曆) 生日 / 時辰 / 地址</span>
                               </p>
                               <textarea 
                                 name="additionalInfo" 
@@ -716,11 +727,10 @@
                           </div>
                         </div>
 
-                        {/* 法會日期複選區塊 */}
                         <div className="bg-stone-950/60 backdrop-blur-sm p-6 rounded-xl border border-stone-800 space-y-4">
                           <div className="mb-3">
                             <label className="block text-sm font-medium text-yellow-500">請選擇參加法會日期 (可複選) *</label>
-                            <p className="text-xs text-red-400 mt-1">※ 為確保疏文撰寫與法器準備，各場次將於法會前 5 天自動截止報名。</p>
+                            <p className="text-xs text-red-400 mt-1">※ 為確保疏文撰寫與結緣品準備，各場次將於法會前 5 天自動截止報名。</p>
                           </div>
                           
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
@@ -762,7 +772,6 @@
                           </div>
                         </div>
 
-                        {/* 匯款資訊區塊 */}
                         <div className="bg-gradient-to-b from-stone-900 to-stone-950 backdrop-blur-sm p-6 md:p-8 rounded-xl border border-yellow-700/50 space-y-4 shadow-lg relative overflow-hidden">
                           <div className="absolute right-[-10%] top-[-20%] w-48 h-48 bg-yellow-600/10 blur-[60px] rounded-full pointer-events-none"></div>
                           
@@ -779,7 +788,6 @@
                               <span className="text-stone-400 font-sans text-sm">匯款帳號</span>
                               <span className="font-black text-yellow-400 text-2xl tracking-widest">059506013547</span>
                             </div>
-                            {/* 動態顯示總金額 */}
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 mt-2 border-t border-stone-800 gap-1">
                               <span className="text-stone-400 font-sans text-sm">本次應繳結緣金</span>
                               <span className="font-black text-yellow-400 text-2xl">NT$ {totalPrice.toLocaleString()}</span>
@@ -812,9 +820,8 @@
                 </div>
               </section>
 
-              {/* Footer */}
               <footer className="bg-black/80 backdrop-blur-md py-8 text-center text-stone-500 text-sm border-t border-stone-900/50">
-                <p>降叁 X 神霄玉府財神會館 © 2026 丙午年 代補財庫祈福專案</p>
+                <p>降叁 x 神霄玉府財神會館 © 2026 丙午年 代補財庫祈福專案</p>
               </footer>
             </div>
           );
@@ -824,6 +831,4 @@
         root.render(<App />);
     </script>
 </body>
-
 </html>
-
