@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>福德正神｜初二十六補財庫．迎利市祈福法會</title>
+    <title>福德正神｜初二、十六‧補財庫科儀</title>
     
     <!-- 1. 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -212,34 +212,45 @@
             if (formData.selectedDates.length === 0) { alert("請選擇補財庫日期！"); return; }
             setIsSubmitting(true);
             
-            // 已為您帶入專屬的 Google Apps Script 網址
-            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwfE6_OjbGg-VpC_8qpdcrAk6FzruMGJ9uiJ5reHfChB0L4AopuCVJqtZxjrEJrlHTug/exec'; 
+            // 最新的 Google Apps Script 網址
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYCysXwQ9JzswbflFM9QrDUtCISR02eUYG-4VxF2_Hb3TwWdo097it8RA6b8RJavVTag/exec'; 
             
             const calculatedTotal = 880 * (formData.participantsCount || 1) * formData.selectedDates.length;
 
+            // 準備資料結構 (對應後台接收)
             const payload = {
-              ...formData,
+              name: formData.name,
+              phone: formData.phone,
+              address: formData.address,
+              calendarType: formData.calendarType,
+              birthDate: formData.birthDate,
+              birthTime: formData.birthTime,
               selectedDate: formData.selectedDates.join('、 '),
               additionalInfo: formData.additionalInfo ? formData.additionalInfo : '無',
+              participantsCount: formData.participantsCount,
               totalPrice: calculatedTotal,
               formSource: '福德正神補財庫',
               ritualType: '補財庫',
               sessionType: '福德招財補庫專案'
             };
 
+            // 使用 URLSearchParams 轉換為標準表單格式，避開 CORS 阻擋
+            const formBody = new URLSearchParams(payload).toString();
+
             try {
-              const response = await fetch(GOOGLE_SCRIPT_URL, {
+              // 加上 mode: 'no-cors' 解決瀏覽器跨域 (CORS) 阻擋 fetch 的問題
+              await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
+                mode: 'no-cors',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formBody,
               });
               
-              if (response.ok) {
-                setIsSubmitted(true);
-                document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
-              } else {
-                alert("送出失敗，請稍後再試或聯繫客服。");
-              }
+              // no-cors 模式下無法讀取 response.ok，若無拋出錯誤則視為傳送成功
+              setIsSubmitted(true);
+              document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
               console.error("提交錯誤:", error);
               alert("網路連線異常，請確認網路狀態後再試。");
@@ -287,7 +298,7 @@
                   </div>
                   <h1 className="text-5xl md:text-7xl font-bold serif-font leading-tight">
                     <span className="gold-text block mb-3 drop-shadow-2xl">福德正神</span>
-                    <span className="text-white text-3xl md:text-5xl font-medium tracking-wide drop-shadow-lg">初二十六．補財庫法會</span>
+                    <span className="text-white text-3xl md:text-5xl font-medium tracking-wide drop-shadow-lg">初二、十六‧補財庫科儀</span>
                   </h1>
                   <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light mt-6 text-shadow-sm">
                     安奉福德，招財納珍。<br/>
@@ -363,18 +374,14 @@
 
               {/* --- 3. 宣傳與詳細說明方格 (1200x450 & 1376x768) --- */}
               <section className="py-12 px-4 max-w-5xl mx-auto space-y-10 relative z-10">
-                {/* 1200x450 方格 */}
+                {/* 1200x450 方格 - 使用使用者提供的圖檔 */}
                 <div className="relative w-full rounded-2xl overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.6)] border border-dao-wealth/40 group bg-dao-dark">
-                  <img src="https://bwabway2068.github.io/wealth-god-2026/banner6.jpg" />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  </div>
+                  <img src="https://bwabway2068.github.io/wealth-god-2026/banner6.jpg" alt="活動宣傳" className="w-full aspect-[1200/450] object-cover transition-all duration-700 transform group-hover:scale-105" />
                 </div>
 
-                {/* 1376x768 方格 */}
+                {/* 1376x768 方格 - 使用使用者提供的圖檔 */}
                 <div className="relative w-full rounded-2xl overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.6)] border border-dao-wealth/40 group bg-dao-dark">
-                  <img src="https://bwabway2068.github.io/wealth-god-2026/banner3.jpg" />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  </div>
+                  <img src="https://bwabway2068.github.io/wealth-god-2026/banner3.jpg" alt="詳細說明" className="w-full aspect-[1376/768] object-cover transition-all duration-700 transform group-hover:scale-105" />
                 </div>
               </section>
 
@@ -585,7 +592,7 @@
                       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 serif-font">福運臨門</h2>
                       <h3 className="text-xl md:text-2xl font-bold text-dao-gold mb-6">感謝報名，財庫疏文已受理</h3>
                       
-                      <div className="bg-dao-wealth/10 border border-dao-wealth/30 p-6 rounded-xl text-left mb-8 backdrop-blur-md shadow-inner">
+                      <div className="bg-dao-wealth/10 border border-dao-wealth/30 p-6 rounded-xl text-left mb-6 backdrop-blur-md shadow-inner">
                          <div className="space-y-4 font-mono text-lg">
                             <div className="flex justify-between border-b border-gray-700 pb-2">
                                 <span className="text-gray-400 text-sm font-sans">銀行代碼</span>
@@ -593,7 +600,7 @@
                             </div>
                             <div className="flex justify-between border-b border-gray-700 pb-2">
                                 <span className="text-gray-400 text-sm font-sans">匯款帳號</span>
-                                <span className="text-dao-gold text-2xl font-bold tracking-widest">0595-XXXX-XXXX</span>
+                                <span className="text-dao-gold text-2xl font-bold tracking-widest">059506013547</span>
                             </div>
                             <div className="flex justify-between pt-2">
                                 <span className="text-gray-400 text-sm font-sans">結緣金額</span>
@@ -601,6 +608,11 @@
                             </div>
                          </div>
                       </div>
+
+                      <p className="text-gray-300 text-sm mb-8 leading-relaxed bg-dao-black/50 p-4 rounded-lg border border-dao-wealth/20">
+                        ※ 溫馨提醒：請於匯款完成後，至 <strong className="text-dao-gold">LINE@</strong> 告知您的<strong className="text-white">匯款帳號後五碼</strong>，方便我們為您查帳與確認，感恩！
+                      </p>
+
                       <button onClick={handleReset} className="w-full bg-gradient-to-r from-dao-gold to-yellow-500 text-black font-bold py-4 rounded-md hover:from-yellow-400 hover:to-yellow-300 transition-all shadow-lg text-lg">
                           繼續為親友預約
                       </button>
@@ -750,5 +762,4 @@
         root.render(<App />);
     </script>
 </body>
-
 </html>
