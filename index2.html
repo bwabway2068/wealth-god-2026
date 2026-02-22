@@ -368,8 +368,6 @@
                     alt="太乙救苦天尊宣傳橫幅" 
                     className="w-full aspect-[1200/450] object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  </div>
                 </div>
 
                 {/* 1376x768 Detail Image */}
@@ -379,8 +377,6 @@
                     alt="詳細說明圖" 
                     className="w-full aspect-[1376/768] object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 transform group-hover:scale-105"
                   />
-                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  </div>
                 </div>
               </section>
 
@@ -399,8 +395,8 @@
                         <Icons.Leaf className="text-dao-jade" size={24} /> 個人解業消災疏文
                       </h3>
                       <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                        包含：法師親批疏文、太上三生解冤神咒加持、<br/>
-                        化解冤結金紙一份。
+                        包含：法師親批疏文、太乙解厄神咒加持、<br/>
+                        化解冤結金紙一份、祈福平安米。
                       </p>
                       <div className="inline-block bg-dao-green/20 text-dao-jade text-sm px-4 py-2 rounded border border-dao-green/50 mt-2">
                         🌿 結緣禮：百解符 + 藥王除障願香 10ml
@@ -493,7 +489,7 @@
                       </p>
                       <div className="flex items-center gap-3 border-t border-dao-green/20 pt-4">
                         <div className="w-10 h-10 rounded-full bg-dao-gold/20 flex items-center justify-center text-dao-gold font-bold">林</div>
-                        <div><div className="text-white text-sm">林O華</div><div className="text-gray-500 text-xs">自營商</div></div>
+                        <div><div className="text-white text-sm">林先生</div><div className="text-gray-500 text-xs">自營商</div></div>
                       </div>
                     </div>
 
@@ -503,7 +499,7 @@
                       </p>
                       <div className="flex items-center gap-3 border-t border-dao-green/20 pt-4">
                         <div className="w-10 h-10 rounded-full bg-dao-jade/20 flex items-center justify-center text-dao-jade font-bold">張</div>
-                        <div><div className="text-white text-sm">張姐</div><div className="text-gray-500 text-xs">家庭主婦</div></div>
+                        <div><div className="text-white text-sm">張小姐</div><div className="text-gray-500 text-xs">家庭主婦</div></div>
                       </div>
                     </div>
                   </div>
@@ -541,16 +537,20 @@
                       </div>
                       
                       <p className="text-gray-400 text-sm mb-6">
-                        請於報名後完成匯款，並加入官方 LINE@ 告知末五碼以利核對。
+                        請於三日內完成匯款，並加入官方 LINE 告知末五碼以利核對。
                       </p>
 
                       <div className="flex flex-col gap-4">
+                        <a href="https://line.me/ti/p/~@995zkady#~" target="_blank" rel="noopener noreferrer" className="w-full bg-gradient-to-r from-dao-green to-emerald-800 hover:from-emerald-700 hover:to-emerald-900 text-white font-bold py-4 rounded transition-colors flex items-center justify-center gap-2 shadow-lg">
+                            <Icons.MessageCircle size={20} />
+                            前往 LINE@ 回報匯款資訊
+                        </a>
                         <button onClick={handleReset} className="w-full bg-transparent border border-dao-gold text-dao-gold hover:bg-dao-gold hover:text-black font-bold py-4 rounded transition-colors">
                             返回報名頁
                         </button>
                         <a href="https://portaly.cc/bwa.bway2068" target="_blank" rel="noopener noreferrer" className="w-full bg-dao-gold/10 border border-dao-gold text-dao-gold hover:bg-dao-gold hover:text-black font-bold py-4 rounded transition-colors flex items-center justify-center gap-2">
                             <Icons.ExternalLink size={20} />
-                            報名其他科儀
+                            瀏覽其他科儀
                         </a>
                       </div>
                     </div>
@@ -649,7 +649,7 @@
                         {/* 日期選擇 */}
                         <div className="bg-dao-green/5 p-6 rounded border border-dao-green/20">
                            <label className="block text-sm font-medium text-dao-gold mb-1">選擇法會日期 (可複選) *</label>
-                           <p className="text-xs text-gray-500 mb-3">※ 為確保疏文撰寫與結緣品準備，各場次將於法會前 5 天截止報名。</p>
+                           <p className="text-xs text-gray-500 mb-3">※ 為確保疏文撰寫與法器準備，各場次將於法會前 5 天截止報名。</p>
                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">
                              {schedule.flatMap((item, idx) => {
                                const sessions = [];
@@ -672,6 +672,36 @@
                                )
                              })}
                            </div>
+                        </div>
+
+                        {/* 匯款資訊區塊 */}
+                        <div className="bg-gradient-to-b from-dao-dark to-black backdrop-blur-sm p-6 md:p-8 rounded-lg border border-dao-gold/30 space-y-4 shadow-lg relative overflow-hidden mt-6">
+                          <div className="absolute right-[-10%] top-[-20%] w-48 h-48 bg-dao-gold/10 blur-[60px] rounded-full pointer-events-none"></div>
+                          
+                          <h3 className="text-xl font-bold text-dao-gold mb-4 flex items-center gap-2 relative z-10">
+                            <Icons.Lotus size={24} className="text-dao-jade" /> 專屬匯款資訊
+                          </h3>
+                          
+                          <div className="bg-black/40 rounded-lg p-5 border border-dao-green/30 space-y-3 font-mono text-lg relative z-10">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b border-gray-800 pb-3 gap-1">
+                              <span className="text-gray-400 font-sans text-sm">銀行代號</span>
+                              <span className="font-bold text-white">013 <span className="text-base font-sans text-gray-400">(國泰世華銀行)</span></span>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-2 gap-1">
+                              <span className="text-gray-400 font-sans text-sm">匯款帳號</span>
+                              <span className="font-black text-dao-gold text-2xl tracking-widest">059506013547</span>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 mt-2 border-t border-gray-800 gap-1">
+                              <span className="text-gray-400 font-sans text-sm">本次應繳結緣金</span>
+                              <span className="font-black text-dao-gold text-2xl">NT$ {totalPrice.toLocaleString()}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-dao-green/10 border border-dao-green/50 p-4 rounded-lg text-sm text-gray-300 flex items-start gap-3 relative z-10">
+                            <p className="leading-relaxed">
+                              匯款完成後，請務必至 <a href="https://line.me/ti/p/~@995zkady#~" target="_blank" rel="noopener noreferrer" className="text-dao-jade border-b border-dao-jade/50 hover:text-white font-bold transition-colors">LINE@ 官方帳號</a> 告知您的<strong className="text-white">「匯款帳號後五碼」</strong>與<strong className="text-white">「報名姓名」</strong>，以便盡速為您對帳並安排科儀。
+                            </p>
+                          </div>
                         </div>
 
                         {/* 送出按鈕 */}
@@ -704,7 +734,3 @@
     </script>
 </body>
 </html>
-
-
-
-
