@@ -215,7 +215,7 @@
             // 最新的 Google Apps Script 網址
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYCysXwQ9JzswbflFM9QrDUtCISR02eUYG-4VxF2_Hb3TwWdo097it8RA6b8RJavVTag/exec'; 
             
-            const calculatedTotal = 880 * (formData.participantsCount || 1) * formData.selectedDates.length;
+            const calculatedTotal = 850 * (formData.participantsCount || 1) * formData.selectedDates.length;
 
             // 準備資料結構 (對應後台接收)
             const payload = {
@@ -259,7 +259,7 @@
             }
           };
 
-          const totalPrice = 880 * (formData.participantsCount || 1) * formData.selectedDates.length;
+          const totalPrice = 850 * (formData.participantsCount || 1) * formData.selectedDates.length;
 
           return (
             <div className="relative min-h-screen text-gray-300 font-sans selection:bg-dao-wealth selection:text-white wealth-pattern">
@@ -413,7 +413,7 @@
                     </div>
 
                     <div className="text-center md:text-right shrink-0 relative z-10">
-                      <div className="text-4xl md:text-5xl font-black text-dao-gold mb-4 serif-font drop-shadow-md">NT$ 880</div>
+                      <div className="text-4xl md:text-5xl font-black text-dao-gold mb-4 serif-font drop-shadow-md">NT$ 850</div>
                       <a href="#register" className="inline-block bg-gradient-to-r from-dao-gold to-yellow-500 hover:from-yellow-400 hover:to-yellow-300 text-black font-bold px-10 py-4 rounded-md transition-all transform hover:scale-105 shadow-[0_5px_15px_rgba(212,175,55,0.4)]">
                         立即登記
                       </a>
@@ -613,15 +613,24 @@
                         ※ 溫馨提醒：請於匯款完成後，至 <strong className="text-dao-gold">LINE@</strong> 告知您的<strong className="text-white">匯款帳號後五碼</strong>，方便我們為您查帳與確認，感恩！
                       </p>
 
-                      <button onClick={handleReset} className="w-full bg-gradient-to-r from-dao-gold to-yellow-500 text-black font-bold py-4 rounded-md hover:from-yellow-400 hover:to-yellow-300 transition-all shadow-lg text-lg">
-                          繼續為親友預約
-                      </button>
+                      <div className="flex flex-col gap-4">
+                        <a href="https://line.me/ti/p/~@995zkady#~" target="_blank" rel="noopener noreferrer" className="w-full bg-[#06C755] text-white font-bold py-4 rounded-md hover:bg-[#05b34c] transition-all shadow-lg text-lg flex items-center justify-center gap-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738S0 4.935 0 10.304c0 4.814 4.27 8.846 10.035 9.608.391.084.922.258 1.057.592.122.298.08.761.037 1.077l-.105.65c-.066.398-.313 1.551 1.353.849 1.666-.701 8.983-5.289 10.973-8.625C23.774 13.064 24 11.722 24 10.304zM7.556 13.62H5.161c-.302 0-.547-.245-.547-.547V7.086c0-.302.245-.547.547-.547h.547c.302 0 .547.245.547.547v4.893h1.302c.302 0 .547.245.547.547v.547c0 .302-.245.547-.547.547zm3.111 0h-.547c-.302 0-.547-.245-.547-.547V7.086c0-.302.245-.547.547-.547h.547c.302 0 .547.245.547.547v5.987c0 .302-.245.547-.547.547zm6.059-3.921l-1.928 2.37v1.004c0 .302-.245.547-.547.547h-.547c-.302 0-.547-.245-.547-.547V7.086c0-.302.245-.547.547-.547h.547c.302 0 .547.245.547.547v3.292l1.831-2.222c.119-.144.301-.219.48-.198.179.02.34.125.429.278l.423.729c.075.128.093.284.048.428-.046.143-.146.26-.282.327l-1.42 1.053 1.636 1.838c.111.125.155.295.118.457-.037.162-.15.297-.301.362l-.766.326c-.161.069-.348.046-.489-.06zm3.305 3.921h-.547c-.302 0-.547-.245-.547-.547v-2.316l-2.073 2.687c-.1.13-.263.208-.432.206h-.372c-.302 0-.547-.245-.547-.547V7.086c0-.302.245-.547.547-.547h.547c.302 0 .547.245.547.547v2.247l2.032-2.617c.101-.131.264-.209.434-.207h.388c.302 0 .547.245.547.547v5.987c0 .302-.245.547-.547.547z"/></svg>
+                            前往 LINE@ 回報匯款資訊
+                        </a>
+                        <a href="https://portaly.cc/bwa.bway2068" target="_blank" rel="noopener noreferrer" className="w-full bg-dao-dark border border-dao-gold text-dao-gold hover:bg-dao-gold hover:text-black font-bold py-4 rounded-md transition-all shadow-lg text-lg flex items-center justify-center gap-2">
+                            <Icons.Sparkles size={20} /> 瀏覽報名其他科儀
+                        </a>
+                        <button onClick={handleReset} className="w-full bg-transparent border border-gray-600 text-gray-400 font-bold py-4 rounded-md hover:border-gray-400 hover:text-white transition-all text-lg mt-2">
+                            繼續為親友預約
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <>
                       <div className="text-center mb-10 relative z-10">
                         <h2 className="text-3xl font-bold serif-font gold-text mb-3 drop-shadow-md">線上報名補財庫</h2>
-                        <p className="text-gray-400 text-sm">請詳細填寫資料，降叁將於法會當日為您宣讀疏文</p>
+                        <p className="text-gray-400 text-sm">請詳細填寫資料，法師將於法會當日為您宣讀疏文</p>
                       </div>
 
                       <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
@@ -686,9 +695,18 @@
                             <select name="birthTime" value={formData.birthTime} onChange={handleInputChange}
                               className="w-full bg-dao-black/80 border border-dao-wealth/50 rounded-md px-4 py-3 text-white focus:outline-none focus:border-dao-gold focus:ring-1 focus:ring-dao-gold transition-colors">
                               <option value="吉時">吉時</option>
-                              {["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"].map(t => (
-                                <option key={t} value={`${t}時`}>{t}時</option>
-                              ))}
+                              <option value="子時">子時 (23:00-01:00)</option>
+                              <option value="丑時">丑時 (01:00-03:00)</option>
+                              <option value="寅時">寅時 (03:00-05:00)</option>
+                              <option value="卯時">卯時 (05:00-07:00)</option>
+                              <option value="辰時">辰時 (07:00-09:00)</option>
+                              <option value="巳時">巳時 (09:00-11:00)</option>
+                              <option value="午時">午時 (11:00-13:00)</option>
+                              <option value="未時">未時 (13:00-15:00)</option>
+                              <option value="申時">申時 (15:00-17:00)</option>
+                              <option value="酉時">酉時 (17:00-19:00)</option>
+                              <option value="戌時">戌時 (19:00-21:00)</option>
+                              <option value="亥時">亥時 (21:00-23:00)</option>
                             </select>
                           </div>
                         </div>
@@ -728,6 +746,31 @@
                             </div>
                         </div>
 
+                        {/* 新增：專屬匯款資訊區塊 */}
+                        <div className="bg-gradient-to-br from-dao-dark to-black p-6 rounded-xl border border-dao-gold/40 shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+                          <h3 className="text-lg font-bold text-dao-gold mb-4 flex items-center gap-2 serif-font">
+                            <Icons.Coin size={22} /> 專屬匯款資訊
+                          </h3>
+                          <div className="space-y-3 font-mono text-sm md:text-base mb-5">
+                            <div className="flex justify-between border-b border-gray-700/50 pb-2">
+                                <span className="text-gray-400 font-sans">銀行代號</span>
+                                <span className="text-white">013 (國泰世華銀行)</span>
+                            </div>
+                            <div className="flex justify-between border-b border-gray-700/50 pb-2">
+                                <span className="text-gray-400 font-sans">匯款帳號</span>
+                                <span className="text-dao-gold font-bold tracking-widest text-lg">059506013547</span>
+                            </div>
+                            <div className="flex justify-between pt-2 items-center">
+                                <span className="text-gray-400 font-sans">本次應繳結緣金</span>
+                                <span className="text-dao-gold font-bold text-2xl">NT$ {totalPrice.toLocaleString()}</span>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-dao-wealth/10 border border-dao-wealth/30 rounded-lg text-sm text-gray-300 leading-relaxed">
+                            <span className="text-dao-gold font-bold mr-1">※</span>
+                            匯款完成後，請務必至 <strong className="text-dao-gold">LINE@ 官方帳號</strong> 告知您的<strong className="text-white border-b border-dao-gold/50 pb-0.5">「匯款帳號後五碼」</strong>與<strong className="text-white border-b border-dao-gold/50 pb-0.5">「報名姓名」</strong>，以便盡速為您對帳並安排科儀。
+                          </div>
+                        </div>
+
                         <div className="pt-6">
                           <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-dao-wealth to-dao-red text-white font-bold text-xl py-4 rounded-md shadow-[0_10px_20px_rgba(180,83,9,0.4)] transition-all transform hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(180,83,9,0.6)] flex justify-center items-center gap-2">
                             {isSubmitting ? (
@@ -763,5 +806,3 @@
     </script>
 </body>
 </html>
-
-
